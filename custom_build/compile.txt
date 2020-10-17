@@ -1,0 +1,5 @@
+COMPILE mPyEasy
+
+- Put 'boards' directory and 'partitions-ota2.csv' into your micropython/ports/esp32/
+- Put mpyeasy src/ directory contents into micropython/ports/esp32/modules/
+- Compile micropython firmware according its documentation
