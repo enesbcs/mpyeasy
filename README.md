@@ -46,14 +46,13 @@ https://github.com/enesbcs/mpyeasy/tree/main/src
 
 # Update
 
-1/ On the recommended firmware binary, the OTA is available in the webGUI. OTA will only with MicroPython images where APP partition starts on 0xF000. 
-Release files in this repository looks like this. If used in OTA, the program will skip the first 0xF000 bytes and upload only the APP partition from the binary, to the next free OTA partition of the ESP32, this is the reason why the flashable FACTORY release and the OTA version is the same.
+1/ If using the recommended firmware binary, the OTA function is available in the webGUI. OTA will only work with MicroPython images where APP partition starts on 0xF000. Release files in this repository looks like this. If used in OTA, the program will automatically skip the first 0xF000 bytes and upload only the APP partition from the binary, to the next free OTA partition of the ESP32 flash. This is the reason why the flashable FACTORY release and the OTA version is the same.
 
-2/ In case the source py files written to the Flash of the device, OTA will not work, source files needs to be updated manually.
+2/ In case the source py files written to the Flash of the device, OTA will not work, source files needs to be updated manually. (Either by REPL or manual FTP)
 
 # Compiling
 
-To create firmware image from python sources follow instructions for compiling standard MicroPython and add mPyEasy source to micropython/ports/esp32/modules subdirectory before "make".
+To create firmware image from python sources, follow instructions for compiling standard MicroPython and add mPyEasy source to micropython/ports/esp32/modules subdirectory before "make" command.
 
 https://github.com/micropython/micropython/tree/master/ports/esp32
 
