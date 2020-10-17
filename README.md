@@ -3,7 +3,7 @@
 - Buying a [coffee](https://ko-fi.com/I3I5UT4H)
 - Direct [PayPal donation](https://www.paypal.me/rpieasy)
 - Contributing to any of my [Wishlist items](https://www.wishlist.com/wishlists_/alexander-nagy/dwGnV/)
-- Adding Python code by [Pull Request](https://github.com/enesbcs/rpieasy/pulls)
+- Adding Python code by [Pull Request](https://github.com/enesbcs/mpyeasy/pulls)
 
 # mPyEasy
 
