@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang='en'>
+<head>
+  <meta charset='utf-8'/>
+  <title>{{name}}</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  {{js}}
+  {{css}}
+</head>
+<body class='bodymenu'>
+  <span class='message' id='rbtmsg'></span>
+  <header class='headermenu'>
+ <h1>mpyEasy: {{name}} {{logo}}</h1><div class='menu_button'>&#9776;</div><BR>
+ {{menu}}
+  </header>
+  <section>
+  <span class='message error'>
+  {{error}}
+  </span>
+  {{content}}
+  </section>
+  <footer>
+ <br>
+ <h6>Made by <a href='http://bitekmindenhol.blog.hu' style='font-size: 15px; text-decoration: none'>NS Tech</a>. - Designed by <a href='http://www.letscontrolit.com' style='font-size: 15px; text-decoration: none'>www.letscontrolit.com</a></h6>
+  </footer>
+</body></html>

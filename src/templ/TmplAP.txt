@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang='en'>
+<head>
+<meta charset='utf-8'/>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>{{name}}</title>
+{{css}}
+</head>
+<body>
+<header class='apheader'>
+<h1>Welcome to mpyEasy AP</h1>
+</header>
+<section>
+<span class='message error'>
+{{error}}
+</span>
+{{content}}
+</section>
+<footer>
+<br>
+<h6>Made by <a href='http://bitekmindenhol.blog.hu' style='font-size: 15px; text-decoration: none'>NS Tech</a>. - Designed by <a href='http://www.letscontrolit.com' style='font-size: 15px; text-decoration: none'>www.letscontrolit.com</a></h6>
+</footer>
+</body>
+
