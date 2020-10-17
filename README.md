@@ -23,18 +23,21 @@ Expect major changes in later versions that may cause incompatibility with earli
 1/ Recommended method to write the firmware binary to the flash directly. It will run on either WROOM or WROVER variants.
 
 - Erase flash at first time on ESP32:
-  esptool.py --port /dev/ttyUSB0 erase_flash
+
+  `esptool.py --port /dev/ttyUSB0 erase_flash`
 - Write firmware:
-  esptool.py --port /dev/ttyUSB0 write_flash -z 0x1000 firmware.bin
+
+  `esptool.py --port /dev/ttyUSB0 write_flash -z 0x1000 firmware.bin`
 
 2/ MicroPython source code from the src directory can be copied to the flash onto a WROVER module with 4MB PSRAM! 
 Without PSRAM it will run out of memory, i warned you!
 
 # Setup
 
-Connect to mpyEasy WIFI AP with configesp password.
-Setup your own wifi data at http://192.168.4.1/config
-Search it on your own network and configure at the obtained dhcp IP with a web browser.
+- Connect to mpyEasy WIFI AP with configesp password.
+- Setup your own wifi data at http://192.168.4.1/config
+- Search it on your own network and configure at the obtained dhcp IP with a web browser.
+
 (LAN module can be enabled at the Hardware page, then configure it on the Config page, if settings are correct it will work after reboot.)
 
 # Update
@@ -47,3 +50,7 @@ Release files in this repository looks like this. If used in OTA, the program wi
 # Compiling
 
 To create firmware image from python sourcese follow instructions for compiling standard MicroPython and add mPyEasy source to micropython/ports/esp32/modules subdirectory before "make".
+
+https://github.com/micropython/micropython/tree/master/ports/esp32
+
+https://blog.horan.hk/micropythonesp32.html
