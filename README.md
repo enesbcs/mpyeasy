@@ -53,7 +53,7 @@ Release files in this repository looks like this. If used in OTA, the program wi
 
 # Compiling
 
-To create firmware image from python sourcese follow instructions for compiling standard MicroPython and add mPyEasy source to micropython/ports/esp32/modules subdirectory before "make".
+To create firmware image from python sources follow instructions for compiling standard MicroPython and add mPyEasy source to micropython/ports/esp32/modules subdirectory before "make".
 
 https://github.com/micropython/micropython/tree/master/ports/esp32
 
