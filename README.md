@@ -22,6 +22,8 @@ Expect major changes in later versions that may cause incompatibility with earli
 
 1/ Recommended method to write the firmware binary to the flash directly. It will run on either WROOM or WROVER variants.
 
+  Download image from: https://github.com/enesbcs/mpyeasy/releases/
+
 - Erase flash at first time on ESP32:
 
   `esptool.py --port /dev/ttyUSB0 erase_flash`
@@ -31,6 +33,8 @@ Expect major changes in later versions that may cause incompatibility with earli
 
 2/ MicroPython source code from the src directory can be copied to the flash onto a WROVER module with 4MB PSRAM! 
 Without PSRAM it will run out of memory, i warned you!
+
+https://github.com/enesbcs/mpyeasy/tree/main/src
 
 # Setup
 
