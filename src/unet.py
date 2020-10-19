@@ -24,7 +24,7 @@ def lan_init():
       return True
     try:
      pp = settings.HW['lan-pwr']
-     if pp < -1:
+     if pp <= -1:
       pp = None
      else:
       pp = machine.Pin(pp)
