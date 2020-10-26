@@ -96,7 +96,7 @@ def get_battery_value():
    bval = 100
  return bval
 
-def findall(restr,tstr):
+def findall(restr,tstr): #missing from mpy regex
  fok = True
  tstr2 = tstr
  res = []
@@ -110,3 +110,15 @@ def findall(restr,tstr):
   else:
    fok = False
  return res
+
+def mvtoarr(mv,rtype): # convert bloody memoryview to bytearray or array for human beings
+     if rtype==0:
+      resarr = bytearray()
+     elif rtype==1:
+      resarr = []
+     for i in range(len(mv)):
+      try:
+       resarr.append(mv[i])
+      except:
+       pass
+     return resarr

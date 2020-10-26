@@ -11,6 +11,8 @@ from inc.upyrtttl.rtttl import RTTTL
 
 commandlist = ["gpio","pwm","pulse","tone","rtttl","servo"]
 
+hiddenpins = 0
+
 def is_pin_analog(pin):
     res = (int(pin) in [0,2,4,12,13,14,15,25,26,27,32,33,34,35,36,39])
     return res
@@ -20,7 +22,11 @@ def is_pin_touch(pin):
     return res
 
 def is_pin_valid(pin):
+    global hiddenpins
     res = (int(pin) in [0,1,2,3,4,5,12,13,14,15,16,17,18,19,21,22,23,25,26,27,32,33,34,35,36,39])
+    if hiddenpins==1:
+     if (int(pin) in [9,10,37,38]):
+      return True
     return res
 
 def is_pin_dac(pin):
@@ -28,7 +34,11 @@ def is_pin_dac(pin):
     return res
 
 def is_pin_pwm(pin):
+    global hiddenpins
     res = (int(pin) in [0,1,2,3,4,5,12,13,14,15,16,17,18,19,21,22,23,25,26,27,32,33])
+    if hiddenpins==1:
+     if (int(pin) in [9,10]):
+      return True
     return res
 
 def syncvalue(bcmpin,value):
@@ -123,7 +133,7 @@ def gpio_commands(cmd):
      suc = False
     misc.addLog(pglobals.LOG_LEVEL_DEBUG,"BCM"+str(pin)+": Pulse ended")
    res = True
-   
+
   elif cmdarr[0]=="tone":
    pin  = -1
    freq = -1
@@ -192,7 +202,7 @@ def gpio_commands(cmd):
     except Exception as e:
      misc.addLog(pglobals.LOG_LEVEL_ERROR,"BCM"+str(pin)+" Servo "+str(e))
      suc = False
-   res = True   
+   res = True
   return res
 
 def play_tone(pin,rfreq,delay):
@@ -209,7 +219,6 @@ def setservoangle(servopin,angle):
        misc.addLog(pglobals.LOG_LEVEL_ERROR,"Servo failed for pin "+str(servopin))
 
 def play_rtttl(pin,notestr):
-# print("DEBUG ",notestr)
  notes = []
  try:
   notes = RTTTL(notestr)

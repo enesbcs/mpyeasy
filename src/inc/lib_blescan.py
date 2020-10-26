@@ -113,7 +113,7 @@ class BLEScan():
         pass
        _blestatus.reportscan(0)
        print("scan pause")#debug
-       time.sleep(uniform(30,50))
+       time.sleep(uniform(45,65))
      else:
       while _blestatus.norequesters()==False or _blestatus.nodataflows()==False or _blestatus.isscaninprogress():
         time.sleep(1.5)

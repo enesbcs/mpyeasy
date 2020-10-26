@@ -21,8 +21,14 @@ def handle_adv(httpResponse,responsearr):
     settings.AdvSettings["rtci2c"] = int(ws.arg("rtci2c",responsearr))
     if settings.AdvSettings["rtci2c"]>=0:
      settings.AdvSettings["extrtc"] = int(ws.arg("extrtc",responsearr))
+    if settings.AdvSettings["rtcaddr"]>=0:
+     settings.AdvSettings["rtcaddr"] = int(ws.arg("rtcaddr",responsearr))
    except:
     pass
+   try:
+    settings.AdvSettings["dangerouspins"] = ws.arg("dangerouspins",responsearr)
+   except:
+    settings.AdvSettings["dangerouspins"] = False
    settings.saveadvsettings()
 
  ws.sendHeadandTail("TmplStd",ws._HEAD)
@@ -55,13 +61,27 @@ def handle_adv(httpResponse,responsearr):
  try:
   rtci2c = settings.AdvSettings["rtci2c"]
  except:
-  settings.AdvSettings["rtci2c"] = 0
   rtci2c = 0
+  settings.AdvSettings["rtci2c"] = 0
  ws.addHtml("<tr><td>RTC I2C line:<td>")
  ws.addSelector_Head("rtci2c",True)
  for d in range(len(options)):
     ws.addSelector_Item("I2C"+str(options[d]),options[d],(rtci2c==options[d]),False)
  ws.addSelector_Foot()
+ try:
+  rtcaddr = settings.AdvSettings["rtcaddr"]
+ except:
+  rtcaddr = 0
+  settings.AdvSettings["rtcaddr"] = 0
+ options = ["0","0x68","0x51"]
+ optionvalues = [0,0x68,0x51]
+ ws.addFormSelector("RTC I2C address","rtcaddr",len(optionvalues),options,optionvalues,None,rtcaddr)
+ ws.addFormSubHeader("Misc Settings")
+ try:
+  dpins = settings.AdvSettings["dangerouspins"]
+ except:
+  dpins = False
+ ws.addFormCheckBox("Show dangerous pins","dangerouspins",dpins)
 
  ws.addFormSeparator(2)
  ws.TXBuffer += "<TR><TD style='width:150px;' align='left'><TD>"

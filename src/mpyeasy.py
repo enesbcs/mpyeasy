@@ -70,16 +70,30 @@ def hardwareInit():
     libhw.initi2c(1,settings.HW['i2c1-scl'],settings.HW['i2c1-sda'],settings.HW['i2c1-freq'])
   except Exception as e:
    print("hwi",e)
+  cspi = False
   try:
-   if settings.HW['spi1']:
-    libhw.initspi(1,settings.HW['spi1-cs'],settings.HW['spi1-baud'])
+   if settings.HW['spic']:
+    libhw.initspi2(1,settings.HW['spic-clk'],settings.HW['spic-mosi'],settings.HW['spic-miso'],settings.HW['spic-baud'])
+    cspi = True
   except Exception as e:
    print("hwi",e)
-  try:
-   if settings.HW['spi2']:
-    libhw.initspi(2,settings.HW['spi2-cs'],settings.HW['spi2-baud'])
-  except Exception as e:
-   print("hwi",e)
+  if cspi==False:
+   try:
+    if settings.HW['spi1']:
+     libhw.initspi(1,settings.HW['spi1-cs'],settings.HW['spi1-baud'])
+   except Exception as e:
+    print("hwi",e)
+   try:
+    if settings.HW['spi2']:
+     libhw.initspi(2,settings.HW['spi2-cs'],settings.HW['spi2-baud'])
+   except Exception as e:
+    print("hwi",e)
+ try:
+  if settings.AdvSettings['dangerouspins']:
+   import inc.lib_gpiohelper as gpiohelper
+   gpiohelper.hiddenpins=1
+ except:
+  pass
 
 def wificonnect():
  if settings.Settings['WifiClient']:
@@ -113,10 +127,14 @@ def setclock():
      import inc.mrtc as mrtc
      print("RTC time sync")
      rtcok = False
+     try:
+      rtca = int(settings.AdvSettings['rtcaddress'])
+     except:
+      rtca = 0x68
      if settings.AdvSettings['rtci2c']==0:
-      rtcok = mrtc.rtcinit(settings.AdvSettings['extrtc'],libhw.i2c0)
+      rtcok = mrtc.rtcinit(settings.AdvSettings['extrtc'],libhw.i2c0,rtca)
      elif settings.AdvSettings['rtci2c']==1:
-      rtcok = mrtc.rtcinit(settings.AdvSettings['extrtc'],libhw.i2c1)
+      rtcok = mrtc.rtcinit(settings.AdvSettings['extrtc'],libhw.i2c1,rtca)
      if rtcok:
       if ntpres: #previous ntp sync success
        rtcok = mrtc.setrtctime()
@@ -402,6 +420,7 @@ def mainloop():
  amin = ""
  days = ['Mon','Tue',"Wed","Thu","Fri","Sat","Sun"]
  while init_ok:
+    try:
         utime.sleep_ms(5)
         if (timeoutReached(timer20ms)):
          run50timespersecond()
@@ -426,6 +445,8 @@ def mainloop():
          if (timeoutReached(timer2s)):
           runon2seconds()
           timer2s = utime.ticks_add(utime.ticks_ms(),2000)
+    except:
+        pass
 
 def main(**params):
     global timer100ms, timer20ms, timer1s, timer2s, timer30s, init_ok

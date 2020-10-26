@@ -10,13 +10,6 @@ def handle_root(httpResponse,responsearr):
  ws.navMenuIndex=0
  ws.TXBuffer = ""
  responsestr = ""
- try:
-  cmdline = ws.arg("cmd",responsearr).strip()
-  if len(cmdline)>0:
-   import commands
-   responsestr = str(commands.doExecuteCommand(cmdline))
- except:
-  pass
 
  httpResponse.WriteResponseOk(
         headers = ({'Cache-Control': 'no-cache'}),
@@ -24,6 +17,17 @@ def handle_root(httpResponse,responsearr):
         contentCharset = 'UTF-8',
         content = "" )
  ws.sendHeadandTail("TmplStd",ws._HEAD)
+ try:
+  cmdline = ws.arg("cmd",responsearr).strip()
+  if cmdline.startswith('reboot'):
+     ws.sendHeadandTail("TmplStd",ws._TAIL)
+
+  if len(cmdline)>0:
+   import commands
+   responsestr = str(commands.doExecuteCommand(cmdline))
+ except:
+  pass
+
  if len(responsestr)>0:
    ws.TXBuffer += "<P>{0}<p>".format(responsestr)
 

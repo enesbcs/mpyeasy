@@ -114,19 +114,29 @@ class Plugin(plugin.PluginProto):
     self.ports = ""
     self.plugin_exit()
 
- def AdvDecoder(self,devi):
+ def AdvDecoder(self,devip):
+    try:
+     devi = []
+     try:
+      if type(devip) is not bytes: # memoryview? LOL
+       devi = misc.mvtoarr(devip,1)
+      else:
+       devi = devip
+     except:
+       pass
      resp = {'addr':0,'type':0,'rssi':0,'flag':3,'d':b''}
      resp['type'], resp['addr'], resp['flag'], resp['rssi'], resp['d'] = devi
      addr = ubinascii.hexlify(resp['addr']).decode('utf-8')
-     addr = ':'.join([addr[i:i+2] for i in range(0,12,2)])
+     addr = ':'.join([addr[i:i+2] for i in range(0,12,2)])     
      notfound = True
      daddr = 0
-     advdat = resp['d']
+     advdat = misc.mvtoarr(resp['d'],0)
+#     print(addr,advdat)#debug     
      while notfound and daddr<len(advdat):
         try:
           dlen = advdat[daddr]
           dt   = advdat[daddr+1]
-          if dt == 22:
+          if int(dt) == 22:
              daddr = daddr + 2
              notfound = False
              break
@@ -134,13 +144,16 @@ class Plugin(plugin.PluginProto):
         except:
          notfound = False
          daddr = -1
-#     print("proc",addr,resp['rssi'],resp['d'])#debug
+#     print("proc",addr,resp['rssi'],advdat)#debug
+#     print(advdat,daddr,advdat[daddr:])#debug     
      if daddr < 0:
       return False
-#     print(advdat[daddr:])#debug
+     advdat = bytes(advdat[daddr:])
+#     print(daddr,advdat)#debug
      ddat = {}
      try:
-      ddat = self.decode_xiaomi(advdat[daddr:]) # forward to xiaomi decoder
+      if len(advdat)>2:
+       ddat = self.decode_xiaomi(advdat) # forward to xiaomi decoder
      except Exception as e:
       print("decode xiaomi error",e)
 #     print(addr,ddat)#debug
@@ -149,6 +162,8 @@ class Plugin(plugin.PluginProto):
        self.dosync(addr,resp['rssi'],ddat) # if supported device, sync with all Tasks
       except:
        pass
+    except Exception as e:
+     print("Decoding error:",e)#debug
 
  def plugin_exit(self):
      try:
@@ -242,22 +257,22 @@ class Plugin(plugin.PluginProto):
   ofs = 0
   try:
    if len(buf)>16:
-    cdata = struct.unpack_from('<H H H B 6B B B B B',buf)
+    cdata = struct.unpack_from('<HHHB6BBBBB',buf)
    elif len(buf)>15:
-    cdata = struct.unpack_from('<H H H B 6B B B B ',buf)
+    cdata = struct.unpack_from('<HHHB6BBBB',buf)
    else:
     cdata = [0]
-  except:
+  except Exception as e:
     cdata = [0]
   if cdata[0] == 0xFE95:
     if cdata[11] != 0x10 and cdata[12] == 0x10:
      ofs = 1
     try:
      if cdata[2] == 0x0576:
-      cdata2 = struct.unpack_from('<h H',buf[15:])
+      cdata2 = struct.unpack_from('<hH',buf[15:])
       res = {"temp":cdata2[0]/10.0,"hum":cdata2[1]/10.0}
      elif cdata[10+ofs]==0xD and cdata[12+ofs]>3:
-      cdata2 = struct.unpack_from('<H H',buf[16+ofs:])
+      cdata2 = struct.unpack_from('<HH',buf[16+ofs:])
       res = {"temp":cdata2[0]/10.0,"hum":cdata2[1]/10.0}
      elif cdata[10+ofs]==0xA and cdata[12+ofs]>0:
       res = {"batt": buf[16+ofs]}
@@ -291,7 +306,7 @@ class Plugin(plugin.PluginProto):
   else:
     if buf[0]==0x1A and buf[1]==0x18: # ATC
      try:
-      cdata = struct.unpack_from('>H 6B h B B H B',buf)
+      cdata = struct.unpack_from('>H6BhBBHB',buf)
      except:
       cdata = [0]
      res = {"temp":cdata[7]/10.0,"hum":cdata[8],"batt":cdata[9]}

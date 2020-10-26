@@ -28,6 +28,8 @@ I2CDevices = [
   "addr": [0x29]},
  {"name": "TSL2561 light sensor",
   "addr": [0x29,0x39,0x49]},
+ {"name": "AXP192",
+  "addr": [0x34]},
  {"name": "APDS-9960 IR/Color/Proximity Sensor",
   "addr": [0x39]},
  {"name": "SSD1305/SSD1306 monochrome OLED",
@@ -50,13 +52,15 @@ I2CDevices = [
   "addr": [0x4A]},
  {"name": "BH1750",
   "addr": [0x23,0x5C]},
+ {"name": "BM8563",
+  "addr": [0x51]},
  {"name": "MPR121 touch sensor",
   "addr": [0x5a,0x5b,0x5c,0x5d]},
  {"name": "DHT12/AM2320",
   "addr": [0x5C]},
  {"name": "MCP4725 DAC",
   "addr": [0x60,0x61]},
- {"name": "DS1307/DS3231/PCF8523 RTC",
+ {"name": "DS1307/DS3231/PCF8523 RTC;MPU6886",
   "addr": [0x68]},
  {"name": "MPU6050 Triple axis gyroscope & accelerometer",
   "addr": [0x68,0x69]},
@@ -108,6 +112,18 @@ def initspi(num,csnum,baudrate=10000000):
  elif num == 2:
    if spi2 is None:
     spi2 = SPI(num,baudrate,sck=Pin(18), mosi=Pin(23), miso=Pin(19), cs=Pin(csnum,Pin.OUT))
+    return spi2
+ return None
+
+def initspi2(num,isck,imosi,imiso,baudrate=10000000):
+ global spi1, spi2
+ if num == 1:
+   if spi1 is None:
+    spi1 = SPI(num,baudrate,sck=Pin(isck), mosi=Pin(imosi), miso=Pin(imiso))
+    return spi1
+ elif num == 2:
+   if spi2 is None:
+    spi2 = SPI(num,baudrate,sck=Pin(isck), mosi=Pin(imosi), miso=Pin(imiso))
     return spi2
  return None
 

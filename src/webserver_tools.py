@@ -21,6 +21,8 @@ def handle_tools(httpResponse,responsearr):
   pass
  ws.TXBuffer = ""
  responsestr = ""
+ if webrequest.startswith('reboot'):
+     ws.sendHeadandTail("TmplStd",ws._TAIL)
  try:
   if len(webrequest)>0:
    import commands

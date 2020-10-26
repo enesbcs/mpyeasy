@@ -1,4 +1,4 @@
-PROGNAME = "mpyEasy"
+PROGNAME = "mPyEasy"
 BUILD   = 10004
 PROGVER = str(BUILD)[:1]+"."+str(BUILD)[1:2]+"."+str(BUILD)[2:]
 
@@ -8,7 +8,7 @@ gpMenu.append(['\u2699 Config','config'])
 gpMenu.append(['\U0001f4ac Controllers','controllers'])
 gpMenu.append(['\U0001f4cc Hardware','hardware'])
 gpMenu.append(['\U0001f50c Devices','devices'])
-gpMenu.append(['\u29f4 Rules','rules'])
+gpMenu.append(['\u26dc Rules','rules'])
 gpMenu.append(['\u2709 Notifications','notifications'])
 gpMenu.append(['\U0001f527 Tools','tools'])
 

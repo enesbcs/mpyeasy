@@ -63,7 +63,7 @@ def wifi_sta_mode(ordn=1):
          if settings.Settings['WDHCP']==False:
           wifi_sta.ifconfig(config(settings.Settings['WIP'], settings.Settings['WMask'], settings.Settings['WGW'], settings.Settings['WDNS']))
          else:
-          wifi_sta.ifconfig('dhcp')          
+          wifi_sta.ifconfig('dhcp')
         except Exception as e:
          pass
         _current_ssid = ordn
@@ -82,7 +82,7 @@ def wifi_sta_mode(ordn=1):
           wifi_sta.ifconfig('dhcp')
       except Exception as e:
          pass
-          
+
 def wifi_sta_isconnected():
     global _active_mode, wifi_sta
     if (_active_mode & 1) == 1:
@@ -143,7 +143,7 @@ def get_ip(nm=""):
     if (_active_mode & 1) == 1:
       wlan = network.WLAN(network.STA_IF)
     elif (_lan_mode==1):
-      wlan = lan_if      
+      wlan = lan_if
     elif (_active_mode & 2) == 2:
       wlan = network.WLAN(network.AP_IF)
     else:
@@ -168,7 +168,7 @@ def get_ssid():
     global _active_mode
     result = ""
     try:
-     if (_active_mode & 1) == 1:        
+     if (_active_mode & 1) == 1:
        wlan = network.WLAN(network.STA_IF)
      elif (_active_mode & 2) == 2:
       wlan = network.WLAN(network.AP_IF)
@@ -209,7 +209,7 @@ def setntp(ntpserver, timezone):
    res = False
    try:
     import ntptime
-    ntptime.host = ntpserver    
+    ntptime.host = ntpserver
     t = ntptime.time()
     tm = utime.gmtime(t+(timezone*60))
     machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0))

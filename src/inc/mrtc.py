@@ -3,16 +3,20 @@ import machine
 
 I2C_RTC = None
 
-def rtcinit(rtype,i2cl):
+def rtcinit(rtype,i2cl,raddress=0x68):
   global I2C_RTC
+  if raddress==0:
+   maddress = 0x68
+  else:
+   maddress = raddress
   if I2C_RTC is None:
    try:
     if rtype==1307:
-     I2C_RTC = urtc.DS1307(i2cl)
+     I2C_RTC = urtc.DS1307(i2cl,address=maddres)
     elif rtype==3231:
-     I2C_RTC = urtc.DS3231(i2cl)
+     I2C_RTC = urtc.DS3231(i2cl,address=maddres)
     elif rtype==8523:
-     I2C_RTC = urtc.PCF8523(i2cl)
+     I2C_RTC = urtc.PCF8523(i2cl,address=maddres)
    except:
     I2C_RTC = None
     return False
