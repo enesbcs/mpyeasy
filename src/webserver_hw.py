@@ -30,10 +30,11 @@ def handle_hw(httpResponse,responsearr):
    iname=""
    tname=""
    try:
-    for i in range(2):
-     iname = "i2c{0}".format(i)
-     settings.HW[iname] = (ws.arg(iname,responsearr) == "on")
-     if settings.HW[iname]:
+    if "i2c0-freq" in responsearr:
+     for i in range(2):
+      iname = "i2c{0}".format(i)
+      settings.HW[iname] = (ws.arg(iname,responsearr) == "on")
+      if settings.HW[iname]:
        tname = iname+"-freq"
        settings.HW[tname] = int(ws.arg(tname,responsearr))
        tname = iname+"-sda"
@@ -43,7 +44,7 @@ def handle_hw(httpResponse,responsearr):
    except:
     pass
    try:
-    if 'spic' in responsearr:
+    if 'spic-baud' in responsearr:
      iname = 'spic'
      settings.HW[iname] = (ws.arg(iname,responsearr) == "on")
      tname = iname+"-clk"
@@ -57,24 +58,26 @@ def handle_hw(httpResponse,responsearr):
    except:
     pass
    try:
-    for i in range(1,3):
+    if "spi1-baud" in responsearr:
+     for i in range(1,3):
       iname = "spi{0}".format(i)
       if 'spic' in responsearr:
        settings.HW[iname] = False
       else:
        settings.HW[iname] = (ws.arg(iname,responsearr) == "on")
       if settings.HW[iname]:
-       tname = iname+"-cs"
-       settings.HW[tname] = int(ws.arg(tname,responsearr))
+#       tname = iname+"-cs"
+#       settings.HW[tname] = int(ws.arg(tname,responsearr))
        tname = iname+"-baud"
        settings.HW[tname] = int(ws.arg(tname,responsearr))
    except:
     pass
    try:
-    for i in range(1,3):
-     iname = "uart{0}".format(i)
-     settings.HW[iname] = (ws.arg(iname,responsearr) == "on")
-     if settings.HW[iname]:
+    if "uart1-baud" in responsearr:
+     for i in range(1,3):
+      iname = "uart{0}".format(i)
+      settings.HW[iname] = (ws.arg(iname,responsearr) == "on")
+      if settings.HW[iname]:
        tname = iname+"-rx"
        settings.HW[tname] = int(ws.arg(tname,responsearr))
        tname = iname+"-tx"
@@ -183,20 +186,24 @@ def handle_hw(httpResponse,responsearr):
    for i in range(1,3):
     iname = "spi{0}".format(i)
     ws.addFormCheckBox("Enable Hardware SPI-"+str(i),iname,settings.HW[iname])
+    if i==1:
+     ws.addFormNote('MOSI=13, MISO=12, CLK=14')
+    elif i==2:
+     ws.addFormNote('MOSI=23, MISO=19, CLK=18')
     tname = iname+"-baud"
     aspd = settings.HW[tname]
     if aspd<1:
      aspd = 18000000
     ws.addFormSelector("Speed",tname,len(optionvalues),options,optionvalues,None,aspd)
     ws.addUnit("Mhz")
-    tname = iname+"-cs"
-    tval = settings.HW[tname]
-    if tval<0:
-     if i==1:
-      tval = 15
-     else:
-      tval = 5
-    ws.addFormPinSelect("CS",tname,tval,1)
+#    tname = iname+"-cs"
+#    tval = settings.HW[tname]
+#    if tval<0:
+#     if i==1:
+#      tval = 15
+#     else:
+#      tval = 5
+#    ws.addFormPinSelect("CS",tname,tval,1)
    try:
     iname = "spic"
     ws.addFormCheckBox("Enable Custom SPI",iname,settings.HW[iname])
@@ -334,10 +341,10 @@ def handle_hw(httpResponse,responsearr):
        reserved = True
        value = "UART2-TX"
      if settings.HW['spi1']: # hspi
-      if settings.HW['spi1-cs']==p:
-       reserved = True
-       value = "SPI1-CS"
-      elif p==12:
+#      if settings.HW['spi1-cs']==p:
+#       reserved = True
+#       value = "SPI1-CS"
+      if p==12:
        reserved = True
        value = "SPI1-MISO"
       elif p==13:
@@ -347,10 +354,10 @@ def handle_hw(httpResponse,responsearr):
        reserved = True
        value = "SPI1-CLK"
      if settings.HW['spi2']: # vspi
-      if settings.HW['spi2-cs']==p:
-       reserved = True
-       value = "SPI2-CS"
-      elif p==19:
+#      if settings.HW['spi2-cs']==p:
+#       reserved = True
+#       value = "SPI2-CS"
+      if p==19:
        reserved = True
        value = "SPI2-MISO"
       elif p==23:
@@ -359,7 +366,7 @@ def handle_hw(httpResponse,responsearr):
       elif p==18:
        reserved = True
        value = "SPI2-CLK"
-     if 'spic' in responsearr:
+     try:
       if settings.HW['spic']: # custom spi
        if settings.HW['spic-clk']==p:
         reserved = True
@@ -370,6 +377,8 @@ def handle_hw(httpResponse,responsearr):
        elif settings.HW['spic-mosi']==p:
         reserved = True
         value = "SPI-MOSI"
+     except:
+      pass
      if reserved==False:
       if p==1:
        reserved = True
@@ -429,8 +438,9 @@ def handle_hw(httpResponse,responsearr):
      except Exception as e:
       pass
      ws.addHtml("</td><td>"+str(value)+"</td></tr>")
-    httpResponse._write(ws.TXBuffer,strEncoding='UTF-8')
-    ws.TXBuffer = ""
+    if (p % 5)==0:
+     httpResponse._write(ws.TXBuffer,strEncoding='UTF-8')
+     ws.TXBuffer = ""
   ws.addFormSeparator(3)
   ws.TXBuffer += "<tr><td colspan=3>"
   ws.addSubmitButton()

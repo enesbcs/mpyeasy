@@ -76,16 +76,16 @@ def hardwareInit():
     libhw.initspi2(1,settings.HW['spic-clk'],settings.HW['spic-mosi'],settings.HW['spic-miso'],settings.HW['spic-baud'])
     cspi = True
   except Exception as e:
-   print("hwi",e)
+   print("hwic",e)
   if cspi==False:
    try:
     if settings.HW['spi1']:
-     libhw.initspi(1,settings.HW['spi1-cs'],settings.HW['spi1-baud'])
+     libhw.initspi(1,settings.HW['spi1-baud'])
    except Exception as e:
     print("hwi",e)
    try:
     if settings.HW['spi2']:
-     libhw.initspi(2,settings.HW['spi2-cs'],settings.HW['spi2-baud'])
+     libhw.initspi(2,settings.HW['spi2-baud'])
    except Exception as e:
     print("hwi",e)
  try:
@@ -445,6 +445,12 @@ def mainloop():
          if (timeoutReached(timer2s)):
           runon2seconds()
           timer2s = utime.ticks_add(utime.ticks_ms(),2000)
+    except SystemExit:
+        init_ok = False
+    except KeyboardInterrupt:
+        init_ok = False
+    except EOFError:
+        init_ok = False
     except:
         pass
 

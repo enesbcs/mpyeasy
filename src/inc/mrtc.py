@@ -12,12 +12,13 @@ def rtcinit(rtype,i2cl,raddress=0x68):
   if I2C_RTC is None:
    try:
     if rtype==1307:
-     I2C_RTC = urtc.DS1307(i2cl,address=maddres)
+     I2C_RTC = urtc.DS1307(i2cl,address=maddress)
     elif rtype==3231:
-     I2C_RTC = urtc.DS3231(i2cl,address=maddres)
+     I2C_RTC = urtc.DS3231(i2cl,address=maddress)
     elif rtype==8523:
-     I2C_RTC = urtc.PCF8523(i2cl,address=maddres)
-   except:
+     I2C_RTC = urtc.PCF8523(i2cl,address=maddress)
+   except Exception as e:
+    print("rtc ",str(e))#debug
     I2C_RTC = None
     return False
   return True

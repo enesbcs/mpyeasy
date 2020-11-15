@@ -360,11 +360,14 @@ def callback_from_controllers(controllerindex,idx,values,taskname="",valuename="
         tvalues = []
         for u in range(pglobals.VARS_PER_TASK):     # fill unused values with -9999, handle at plugin side!!!
          tvalues.append(-9999)
-        for v in range(Tasks[x].valuecount):           # match with valuename
-         if Tasks[x].valuenames[v]==valuename:
-          tvalues[v] = values
-          Tasks[x].plugin_receivedata(tvalues)
-          break
+        if valuename=="":
+         Tasks[x].plugin_receivedata(values)
+        else:
+         for v in range(Tasks[x].valuecount):           # match with valuename
+          if Tasks[x].valuenames[v]==valuename:
+           tvalues[v] = values
+           Tasks[x].plugin_receivedata(tvalues)
+           break
         break
 
 def get_i2c_pins(i2cline=0):

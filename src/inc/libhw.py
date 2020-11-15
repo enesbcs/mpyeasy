@@ -103,15 +103,15 @@ def initi2c(num,iscl,isda,ifreq=100000,force=False):
   return i2c1
  return None
 
-def initspi(num,csnum,baudrate=10000000):
+def initspi(num,baudrate=10000000):
  global spi1, spi2
  if num == 1:
    if spi1 is None:
-    spi1 = SPI(num,baudrate,sck=Pin(14), mosi=Pin(13), miso=Pin(12), cs=Pin(csnum,Pin.OUT))
+    spi1 = SPI(num,baudrate,sck=Pin(14), mosi=Pin(13), miso=Pin(12))
     return spi1
  elif num == 2:
    if spi2 is None:
-    spi2 = SPI(num,baudrate,sck=Pin(18), mosi=Pin(23), miso=Pin(19), cs=Pin(csnum,Pin.OUT))
+    spi2 = SPI(num,baudrate,sck=Pin(18), mosi=Pin(23), miso=Pin(19))
     return spi2
  return None
 

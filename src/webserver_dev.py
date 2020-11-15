@@ -155,7 +155,7 @@ def handle_devices(httpResponse,responsearr):
          settings.Tasks[taskIndex].plugin_init() # call plugin init / (ws.arg("TDE",responsearr) == "on")
        except:
         pass
-    
+
       if edit != '' and not(taskIndexNotSet): # when form submitted
        if taskdevicenumber != 0: # save settings
         if taskdevicetimer > 0:
@@ -199,7 +199,7 @@ def handle_devices(httpResponse,responsearr):
 #         settings.Tasks[taskIndex].pullup = (ws.arg("TDPPU",responsearr) == "on")
         if settings.Tasks[taskIndex].inverselogicoption:
          settings.Tasks[taskIndex].pininversed = (ws.arg("TDPI",responsearr) == "on")
-        
+
         for varnr in range(0,settings.Tasks[taskIndex].valuecount):
          tvname = str(ws.arg("TDVN"+str(varnr+1),responsearr))
          if tvname:
@@ -211,16 +211,21 @@ def handle_devices(httpResponse,responsearr):
           settings.Tasks[taskIndex].decimals[varnr] = tvdec
          else:
           settings.Tasks[taskIndex].valuenames[varnr] = ""
-        
-        settings.Tasks[taskIndex].webform_save(responsearr) # call plugin read FORM
-        settings.Tasks[taskIndex].enabled = (ws.arg("TDE",responsearr) == "on")
-        
+
         try:
          settings.Tasks[taskIndex].i2c = int(ws.arg("i2c",responsearr))
         except:
          settings.Tasks[taskIndex].i2c = -1
+        try:
+         settings.Tasks[taskIndex].spi = int(ws.arg("spi",responsearr))
+        except:
+         settings.Tasks[taskIndex].spi = -1
+
         if settings.Tasks[taskIndex].taskname=="":
-         settings.Tasks[taskIndex].enabled = False              
+         settings.Tasks[taskIndex].enabled = False
+
+        settings.Tasks[taskIndex].webform_save(responsearr) # call plugin read FORM
+        settings.Tasks[taskIndex].enabled = (ws.arg("TDE",responsearr) == "on")
         settings.savetasks() # savetasksettings!!!
 
       ws.TXBuffer += "<input type='hidden' name='TDNUM' value='{0}'>{1}".format(settings.Tasks[taskIndex].pluginid,settings.Tasks[taskIndex].getdevicename())
@@ -257,6 +262,17 @@ def handle_devices(httpResponse,responsearr):
           ws.addSelector_Head("i2c",True)
           for d in range(len(options)):
            ws.addSelector_Item("I2C"+str(options[d]),options[d],(settings.Tasks[taskIndex].i2c==options[d]),False)
+          ws.addSelector_Foot()
+      if (settings.Tasks[taskIndex].dtype==pglobals.DEVICE_TYPE_SPI):
+          try:
+           import inc.libhw as libhw
+           options = libhw.getspilist()
+          except:
+           options = []
+          ws.addHtml("<tr><td>SPI line:<td>")
+          ws.addSelector_Head("spi",True)
+          for d in range(len(options)):
+           ws.addSelector_Item("SPI"+str(options[d]),options[d],(settings.Tasks[taskIndex].spi==options[d]),False)
           ws.addSelector_Foot()
 
       httpResponse._write(ws.TXBuffer,strEncoding='UTF-8')

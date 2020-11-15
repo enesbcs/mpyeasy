@@ -257,7 +257,7 @@ class Controller(controller.ControllerProto):
     if decodeerr:
      misc.addLog(pglobals.LOG_LEVEL_ERROR,"JSON decode error: "+msg2)
     else:
-     self.onmsgcallbackfunc(self.controllerindex,devidx,tval)
+     self._onmsgcallbackfunc(self.controllerindex,devidx,tval)
 
  def senddata(self,idx, taskobj, changedvalue = -1):
   if self.enabled:

@@ -282,7 +282,7 @@ class Controller(controller.ControllerProto):
         ttaskname = dnames[v1]
 #      print(v1,v2,ttaskname,dnames) #debug
       if ttaskname != "" and v2>-1 and v2<len(dnames):
-       self.onmsgcallbackfunc(self.controllerindex,-1,msg2,taskname=ttaskname,valuename=dnames[v2]) #-> Settings.callback_from_controllers()
+       self._onmsgcallbackfunc(self.controllerindex,-1,msg2,taskname=ttaskname,valuename=dnames[v2]) #-> Settings.callback_from_controllers()
        success = True
 
  def senddata(self,idx, taskobj, changedvalue = -1):

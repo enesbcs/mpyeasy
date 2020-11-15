@@ -45,6 +45,7 @@ class Plugin(plugin.PluginProto):
   self.address = ""
   self.rssi = -1
   self.battery = 255
+  self.startup = 0
 
  def webform_load(self): # create html page for settings
   ws.addFormTextBox("Remote Device Address","plugin_527_addr",str(self.address),20)
@@ -104,6 +105,9 @@ class Plugin(plugin.PluginProto):
      if self._blescanner._scanning==False:
       start_new_thread(self._blescanner.sniff, (self.AdvDecoder,30))
      self.initialized = True
+     self.startup = time.time()
+     if self.battery<1:
+      self.battery=255
      self.ports = str(self.address)
      misc.addLog(pglobals.LOG_LEVEL_INFO,"BLE sniffer init ok")
     except Exception as e:
@@ -184,18 +188,26 @@ class Plugin(plugin.PluginProto):
     if "-t" in key:
      if self._attribs[key]>lastupdate:
       lastupdate = self._attribs[key]
-   if (time.time()-lastupdate) > (3*self.interval):
+   otime = (3*self.interval)
+   if otime<1800:
+    otime = 1800
+   orssi = self.rssi
+   report = True
+   if ((time.time()-lastupdate) > otime) and ((time.time()-self.startup) > otime):
     self.rssi= -100
     self.battery = 0
-   elif self.battery==0:
-    self.battery=255
+    if self.rssi==orssi:
+     report = False
+   if report and len(self._attribs)<2:
+    report = False
    for v in range(0,4):
     vtype = int(self.taskdevicepluginconfig[v])
     if vtype != 0:
      self.set_value(v+1,self.p527_get_value(vtype),False)
-   self.plugin_senddata()
+   if report:
+    self.plugin_senddata()
    self._lastdataservetime = utime.ticks_ms()
-   self.readinprogress = 0   
+   self.readinprogress = 0
    result = True
   return result
 

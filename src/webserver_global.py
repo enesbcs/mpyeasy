@@ -78,7 +78,7 @@ def sendHeadandTail(tmplName, Tail = False):
   pageTemplate = ""
   #int indexStart, indexEnd;
   #String varName;  //, varValue;
-  gc.collect() # compat
+  #gc.collect() # compat
   pageTemplate = getWebPageTemplateDefault(tmplName)
   if (Tail):
     contentpos = pageTemplate.find("{{content}}")
@@ -106,7 +106,7 @@ def sendHeadandTail(tmplName, Tail = False):
   pageTemplate = ""
   varName =""
   gc.collect() # compat
-  
+
 def getErrorNotifications():
  return False
 
@@ -337,6 +337,36 @@ def addCopyButton(value, delimiter, name,dist=""):
   TXBuffer += "<button class='button link' onclick='setClipboard"+str(dist)+"()'>"
   TXBuffer += str(name)
   TXBuffer += "</button>"
+
+def addTableSeparator(label, colspan, h_size):
+  global TXBuffer
+  TXBuffer += "<TR><TD colspan="
+  TXBuffer += str(colspan)
+  TXBuffer += "><H"
+  TXBuffer += str(h_size)
+  TXBuffer += '>'
+  TXBuffer += str(label)
+  TXBuffer += "</H";
+  TXBuffer += str(h_size)
+  TXBuffer += "></TD></TR>"
+
+def addFloatNumberBox(fid, value, fmin, fmax):
+  global TXBuffer
+  TXBuffer += "<input type='number' name='"
+  TXBuffer += str(fid)
+  TXBuffer += '\''
+  TXBuffer += " min="
+  TXBuffer += str(fmin)
+  TXBuffer += " max="
+  TXBuffer += str(fmax)
+  TXBuffer += " step=0.01"
+  TXBuffer += " style='width:5em;' value="
+  TXBuffer += str(value)
+  TXBuffer += '>'
+
+def addFormFloatNumberBox(label, fid, value, fmin, fmax):
+  addRowLabel(label)
+  addFloatNumberBox(fid, value, fmin, fmax)
 
 def addFormLogLevelSelect(label, sid, choice):
   addRowLabel(label)

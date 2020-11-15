@@ -23,7 +23,7 @@ class ControllerProto:
   self.usesID = False
   self.connected = False
   self.onmsgcallbacksupported = False
-  self.onmsgcallbackfunc = None
+  self._onmsgcallbackfunc = None
   self.usesAccount = False
   self.usesPassword = False
   self.usesMQTT = False
@@ -61,7 +61,7 @@ class ControllerProto:
 
  def setonmsgcallback(self,callbackfunc):
   if self.onmsgcallbacksupported:
-   self.onmsgcallbackfunc = callbackfunc # call onmsgcallbackfunc if controller able to send data to the plugin
+   self._onmsgcallbackfunc = callbackfunc # call onmsgcallbackfunc if controller able to send data to the plugin
 
  def controller_exit(self):
   self.disconnect()

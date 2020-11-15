@@ -185,6 +185,11 @@ def handle_devices(httpResponse,responsearr):
              ws.TXBuffer += "{0}<BR>{1}".format(i2cpins[0],i2cpins[1])
             except:
              ws.TXBuffer += "NO-I2C"
+        if (settings.Tasks[x].dtype == pglobals.DEVICE_TYPE_SPI):
+            try:
+             ws.TXBuffer += "SPI{0}".format(settings.Tasks[x].spi)
+            except:
+             ws.TXBuffer += "NO-SPI"
         for tp in range(0,len(settings.Tasks[x].taskdevicepin)):
           if int(settings.Tasks[x].taskdevicepin[tp])>=0:
             ws.TXBuffer += "<br>GPIO-{0}".format(settings.Tasks[x].taskdevicepin[tp])
