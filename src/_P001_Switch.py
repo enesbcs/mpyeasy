@@ -12,7 +12,7 @@ import utime
 try:
  from machine import Pin
 except:
- pass # do not load
+ pass
 
 class Plugin(plugin.PluginProto):
  PLUGIN_ID = 1

@@ -28,7 +28,7 @@ except:
 try:
  import inc.lib_gpiohelper as gpiohelper
 except:
- pass    
+ pass
 
 GlobalRules = []
 SysVars = ["systime","system_hm","lcltime","syshour","sysmin","syssec","sysday","sysmonth",
@@ -83,7 +83,7 @@ def doExecuteCommand(cmdline,Parse=True):
  cmdarr[0] = cmdarr[0].strip().lower()
  commandfound = False
  misc.addLog(pglobals.LOG_LEVEL_INFO,"CMD: "+cmdline.replace("==","="))
- 
+
  if cmdarr[0] == "delay":
   try:
    s = float(cmdarr[1])

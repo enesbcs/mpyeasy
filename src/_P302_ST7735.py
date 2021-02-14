@@ -24,10 +24,10 @@ from inc.writer.writer import CWriter
 import gc
 
 class Plugin(plugin.PluginProto):
- PLUGIN_ID = 212
+ PLUGIN_ID = 302
  PLUGIN_NAME = "Display - Simple ST7735 (EXPERIMENTAL)"
  PLUGIN_VALUENAME1 = "TFT"
- P212_Nlines = 8
+ P302_Nlines = 8
 
  def __init__(self,taskindex): # general init
   plugin.PluginProto.__init__(self,taskindex)
@@ -140,56 +140,56 @@ class Plugin(plugin.PluginProto):
  def webform_load(self): # create html page for settings
      gc.collect()
      ws.addFormNote("Enable <a href='hardware'>SPI bus</a> first!")
-     ws.addFormPinSelect("CS","p212_cs",self.cs,1)
-     ws.addFormPinSelect("DC","p212_dc",self.dc,1)
-     ws.addFormPinSelect("RST","p212_rst",self.rst,1)
+     ws.addFormPinSelect("CS","p302_cs",self.cs,1)
+     ws.addFormPinSelect("DC","p302_dc",self.dc,1)
+     ws.addFormPinSelect("RST","p302_rst",self.rst,1)
      ws.addFormNote("Optional")
      try:
       ws.addHtml("<tr><td>Variant:<td>")
       options = ['Red/M5StickC','Blue','Blue2','Green']
       optionvalues = ['r','b','b2','g']
-      ws.addSelector_Head("p212_disptype",False)
+      ws.addSelector_Head("p302_disptype",False)
       for d in range(len(options)):
          ws.addSelector_Item(options[d],optionvalues[d],(self.disptype==optionvalues[d]),False)
       ws.addSelector_Foot()
      except:
       pass
      gc.collect()
-     ws.addFormNumericBox("Width","p212_width",self.width,1,320)
-     ws.addFormNumericBox("Height","p212_height",self.height,1,320)
+     ws.addFormNumericBox("Width","p302_width",self.width,1,320)
+     ws.addFormNumericBox("Height","p302_height",self.height,1,320)
 
-     ws.addFormNumericBox("X offset","p212_xoffset",self.xoffset,0,100)
-     ws.addFormNumericBox("Y offset","p212_yoffset",self.yoffset,0,100)
+     ws.addFormNumericBox("X offset","p302_xoffset",self.xoffset,0,100)
+     ws.addFormNumericBox("Y offset","p302_yoffset",self.yoffset,0,100)
      options =      ["RGB","BGR"]
      optionvalues = [1,0]
-     ws.addFormSelector("Color mode","p212_rgb",len(optionvalues),options,optionvalues,None,self.rgb)
+     ws.addFormSelector("Color mode","p302_rgb",len(optionvalues),options,optionvalues,None,self.rgb)
 
      options =      ["0","90","180","270"]
      optionvalues = [0,90,180,270]
-     ws.addFormSelector("Rotation","p212_rotate",len(optionvalues),options,optionvalues,None,self.rotate)
+     ws.addFormSelector("Rotation","p302_rotate",len(optionvalues),options,optionvalues,None,self.rotate)
      ws.addUnit("deg")
      try:
       choice5 = int(float(self.taskdevicepluginconfig[4])) # store line count
       ws.addHtml("<tr><td>Number of lines:<td>")
-      ws.addSelector_Head("p212_linecount",False)
-      for l in range(1,self.P212_Nlines+1):
+      ws.addSelector_Head("p302_linecount",False)
+      for l in range(1,self.P302_Nlines+1):
        ws.addSelector_Item(str(l),l,(l==choice5),False)
       ws.addSelector_Foot()
      except:
       pass
-     ws.addFormNumericBox("Try to display # characters per row","p212_charperl",self.taskdevicepluginconfig[5],1,32)
+     ws.addFormNumericBox("Try to display # characters per row","p302_charperl",self.taskdevicepluginconfig[5],1,32)
      ws.addFormNote("Leave it '1' if you do not care")
-     ws.addFormCheckBox("Clear only used lines","p212_partialclear",self.taskdevicepluginconfig[6])
+     ws.addFormCheckBox("Clear only used lines","p302_partialclear",self.taskdevicepluginconfig[6])
      if choice5 > 0 and choice5<9:
       lc = choice5
      else:
-      lc = self.P212_Nlines
+      lc = self.P302_Nlines
      for l in range(lc):
       try:
        linestr = self.lines[l]
       except:
        linestr = ""
-      ws.addFormTextBox("Line"+str(l+1),"p212_template"+str(l),linestr,128)
+      ws.addFormTextBox("Line"+str(l+1),"p302_template"+str(l),linestr,128)
      return True
 
  def plugin_exit(self):
@@ -200,66 +200,66 @@ class Plugin(plugin.PluginProto):
    pass
 
  def webform_save(self,params): # process settings post reply
-   par = ws.arg("p212_cs",params)
+   par = ws.arg("p302_cs",params)
    if par == "":
     par = -1
    self.cs = int(par)
-   par = ws.arg("p212_dc",params)
+   par = ws.arg("p302_dc",params)
    if par == "":
     par = -1
    self.dc = int(par)
-   par = ws.arg("p212_rst",params)
+   par = ws.arg("p302_rst",params)
    if par == "":
     par = -1
    self.rst = int(par)
-   par = ws.arg("p212_width",params)
+   par = ws.arg("p302_width",params)
    if par == "":
     par = 0
    self.width = int(par)
-   par = ws.arg("p212_height",params)
+   par = ws.arg("p302_height",params)
    if par == "":
     par = 0
    self.height = int(par)
-   par = ws.arg("p212_disptype",params)
+   par = ws.arg("p302_disptype",params)
    if par == "":
     par = 'r'
    self.disptype = str(par)
 
-   par = ws.arg("p212_rotate",params)
+   par = ws.arg("p302_rotate",params)
    if par == "":
     par = 0
    self.rotate = int(par)
 
-   par = ws.arg("p212_linecount",params)
+   par = ws.arg("p302_linecount",params)
    if par == "":
     par = 8
    self.taskdevicepluginconfig[4] = int(par)
 
-   par = ws.arg("p212_charperl",params)
+   par = ws.arg("p302_charperl",params)
    if par == "":
     par = 1
    self.taskdevicepluginconfig[5] = int(par)
 
-   par = ws.arg("p212_xoffset",params)
+   par = ws.arg("p302_xoffset",params)
    if par == "":
     par = 1
    self.xoffset = int(par)
-   par = ws.arg("p212_yoffset",params)
+   par = ws.arg("p302_yoffset",params)
    if par == "":
     par = 1
    self.yoffset = int(par)
-   par = ws.arg("p212_rgb",params)
+   par = ws.arg("p302_rgb",params)
    if par == "":
     par = 1
    self.rgb = int(par)
 
-   if (ws.arg("p212_partialclear",params)=="on"):
+   if (ws.arg("p302_partialclear",params)=="on"):
     self.taskdevicepluginconfig[6] = True
    else:
     self.taskdevicepluginconfig[6] = False
 
-   for l in range(self.P212_Nlines):
-    linestr = ws.arg("p212_template"+str(l),params).strip()
+   for l in range(self.P302_Nlines):
+    linestr = ws.arg("p302_template"+str(l),params).strip()
 #    if linestr!="" and linestr!="0":
     try:
       self.lines[l]=linestr

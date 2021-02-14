@@ -7,6 +7,7 @@ import pglobals
 
 @MicroWebSrv.route('/')
 @MicroWebSrv.route('/','GET')
+@MicroWebSrv.route('/generate_204')
 def handle_root(httpClient, httpResponse):
  if httpClient.GetRequestMethod()=="GET":
   responsearr = httpClient.GetRequestQueryParams()
@@ -228,6 +229,66 @@ def handle_ota(httpClient, httpResponse):
   misc.addLog(pglobals.LOG_LEVEL_ERROR, "Webserver ota error: "+str(e))
  gc.collect()
 
+@MicroWebSrv.route('/dash')
+@MicroWebSrv.route('/dash','GET')
+@MicroWebSrv.route('/dash','POST')
+def handle_dash(httpClient, httpResponse):
+ if httpClient.GetRequestMethod()=="GET":
+  responsearr = httpClient.GetRequestQueryParams()
+ else:
+  responsearr  = httpClient.ReadRequestPostedFormData()
+ try:
+  import webserver_dash
+  webserver_dash.handle_dash(httpResponse,responsearr)
+  del sys.modules['webserver_dash']
+ except Exception as e:
+  misc.addLog(pglobals.LOG_LEVEL_ERROR, "Webserver dash error: "+str(e))
+ gc.collect()
+
+@MicroWebSrv.route('/control')
+@MicroWebSrv.route('/control','GET')
+def handle_command(httpClient, httpResponse):
+ if httpClient.GetRequestMethod()=="GET":
+  responsearr = httpClient.GetRequestQueryParams()
+ else:
+  responsearr  = httpClient.ReadRequestPostedFormData()
+ try:
+  import webserver_command
+  webserver_command.handle_command(httpResponse,responsearr)
+  del sys.modules['webserver_command']
+ except Exception as e:
+  misc.addLog(pglobals.LOG_LEVEL_ERROR, "Webserver command error: "+str(e))
+ gc.collect()
+
+@MicroWebSrv.route('/csv')
+@MicroWebSrv.route('/csv','GET')
+def handle_csv(httpClient, httpResponse):
+ if httpClient.GetRequestMethod()=="GET":
+  responsearr = httpClient.GetRequestQueryParams()
+ else:
+  responsearr  = httpClient.ReadRequestPostedFormData()
+ try:
+  import webserver_csv
+  webserver_csv.handle_csv(httpResponse,responsearr)
+  del sys.modules['webserver_csv']
+ except Exception as e:
+  misc.addLog(pglobals.LOG_LEVEL_ERROR, "Webserver csv error: "+str(e))
+ gc.collect()
+
+@MicroWebSrv.route('/json')
+@MicroWebSrv.route('/json','GET')
+def handle_json(httpClient, httpResponse):
+ if httpClient.GetRequestMethod()=="GET":
+  responsearr = httpClient.GetRequestQueryParams()
+ else:
+  responsearr  = httpClient.ReadRequestPostedFormData()
+ try:
+  import webserver_json
+  webserver_json.handle_json(httpResponse,responsearr)
+  del sys.modules['webserver_json']
+ except Exception as e:
+  misc.addLog(pglobals.LOG_LEVEL_ERROR, "Webserver json error: "+str(e))
+ gc.collect()
 
 # Starting Webserver entity
 WebServer = MicroWebSrv(webPath=pglobals.fpath+'www/')

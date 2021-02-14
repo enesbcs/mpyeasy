@@ -55,9 +55,23 @@ def lan_isconnected():
 
 def wifi_sta_mode(ordn=1):
     global _active_mode, _current_ssid, wifi_sta
-    wifi_sta = network.WLAN(network.STA_IF)
+    try:
+     wifi_sta = network.WLAN(network.STA_IF)
+    except:
+     wifi_sta = None
+     _current_ssid = 0
+     return False
     _active_mode = (_active_mode | 1)
-    if not wifi_sta.isconnected():
+    forceconn = False
+    if wifi_sta.isconnected():
+      try:
+         if settings.Settings['WDHCP']==False:
+          wifi_sta.ifconfig((settings.Settings['WIP'], settings.Settings['WMask'], settings.Settings['WGW'], settings.Settings['WDNS']))
+         else:
+          wifi_sta.ifconfig('dhcp')
+      except Exception as e:
+         forceconn = True
+    if not wifi_sta.isconnected() or forceconn:
         try:
          wifi_sta.active(True)
          if settings.Settings['WDHCP']==False:
@@ -65,7 +79,7 @@ def wifi_sta_mode(ordn=1):
          else:
           wifi_sta.ifconfig('dhcp')
         except Exception as e:
-         pass
+          pass
         _current_ssid = ordn
         try:
          if ordn==1 and settings.Settings['AP1SSID']:
@@ -74,21 +88,16 @@ def wifi_sta_mode(ordn=1):
           wifi_sta.connect(settings.Settings['AP2SSID'], settings.Settings['AP2KEY'])
         except:
          _current_ssid = 0
-    else: # already connected
-      try:
-         if settings.Settings['WDHCP']==False:
-          wifi_sta.ifconfig((settings.Settings['WIP'], settings.Settings['WMask'], settings.Settings['WGW'], settings.Settings['WDNS']))
-         else:
-          wifi_sta.ifconfig('dhcp')
-      except Exception as e:
-         pass
 
 def wifi_sta_isconnected():
     global _active_mode, wifi_sta
-    if (_active_mode & 1) == 1:
+    try:
+     if (_active_mode & 1) == 1:
       wifi_sta = network.WLAN(network.STA_IF)
       if wifi_sta.isconnected():
         return True
+    except:
+     pass
     return False
 
 def wifi_sta_disconnect(force=False):
@@ -102,7 +111,7 @@ def wifi_sta_disconnect(force=False):
       pass
      _current_ssid = 0
      if ((_active_mode & 1) == 1):
-      _active_mode = _active_mode - 1     
+      _active_mode = _active_mode - 1
 
 def wifi_ap_mode():
     global _active_mode
@@ -114,6 +123,20 @@ def wifi_ap_mode():
     else:
       amode = 4
     wifi_ap.config(essid=settings.Settings["APSSID"],password=settings.Settings["APKEY"],authmode=amode)
+    captiveok = False
+    try:
+     if settings.Settings["APCAPTIVE"]:
+        from inc.microdns.microDNSSrv import MicroDNSSrv
+        wifi_ap.ifconfig( ('172.217.28.1','255.255.255.0','172.217.28.1','172.217.28.1') )
+        if MicroDNSSrv.Create({ '*' : '172.217.28.1' }):
+          print("Captive DNS started")
+          captiveok = True
+        else:
+          print("Captive DNS failed")
+    except:
+     pass
+    if captiveok == False:
+     wifi_ap.ifconfig( ('192.168.4.1','255.255.255.0','192.168.4.1','192.168.4.1') )
 
 def wifi_ap_stop(force=False):
    global _active_mode
@@ -140,10 +163,10 @@ def get_ip(nm=""):
    elif nm=="LAN":
       wlan = lan_if
    else:
-    if (_active_mode & 1) == 1:
-      wlan = network.WLAN(network.STA_IF)
-    elif (_lan_mode==1):
+    if (_lan_mode==1):
       wlan = lan_if
+    elif (_active_mode & 1) == 1:
+      wlan = network.WLAN(network.STA_IF)
     elif (_active_mode & 2) == 2:
       wlan = network.WLAN(network.AP_IF)
     else:
@@ -191,10 +214,10 @@ def get_mac(nm=""):
     elif nm=="LAN":
       wlan = lan_if
     else:
-     if (_active_mode & 1) == 1:
+     if _lan_mode==1:
+      wlan = lan_if        
+     elif (_active_mode & 1) == 1:
       wlan = network.WLAN(network.STA_IF)
-     elif _lan_mode==1:
-      wlan = lan_if
      elif (_active_mode & 2) == 2:
       wlan = network.WLAN(network.AP_IF)
      else:

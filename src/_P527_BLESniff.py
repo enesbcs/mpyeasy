@@ -49,7 +49,7 @@ class Plugin(plugin.PluginProto):
 
  def webform_load(self): # create html page for settings
   ws.addFormTextBox("Remote Device Address","plugin_527_addr",str(self.address),20)
-  ws.addFormNote("Supported device types: LYWSD02, CGQ, CGG1, MiFlora")
+  ws.addFormNote("Supported device types: LYWSD02, CGQ, CGG1, MiFlora, ATC")
   ws.addFormNote("If you are using Sniffer, you can not use any other BLE plugin, as scanning is continous! Although multiple sniffer task can be used.")
   choice1 = self.taskdevicepluginconfig[0]
   choice2 = self.taskdevicepluginconfig[1]

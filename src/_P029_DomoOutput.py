@@ -8,6 +8,7 @@ import plugin
 import pglobals
 import misc
 import webserver_global as ws
+import utime
 try:
  from machine import Pin
 except:
@@ -42,10 +43,14 @@ class Plugin(plugin.PluginProto):
     self.initialized = False
     misc.addLog(pglobals.LOG_LEVEL_ERROR,self.taskname+": "+str(e))
    self.sync()
+  else:
+   self.timer1s = False
 
  def webform_load(self):
   ws.addFormNote("Please make sure to select <a href='hardware'>pin configured for Output!</a>")
   ws.addFormCheckBox("Preserve state at startup","p029_preserve",self.taskdevicepluginconfig[0])
+  ws.addFormNumericBox("Auto OFF after","p029_off",self.taskdevicepluginconfig[1],0,3600)
+  ws.addUnit("s")
   return True
 
  def webform_save(self,params):
@@ -53,6 +58,11 @@ class Plugin(plugin.PluginProto):
    self.taskdevicepluginconfig[0] = True
   else:
    self.taskdevicepluginconfig[0] = False
+  par = ws.arg("p029_off",params)
+  try:
+    self.taskdevicepluginconfig[1] = int(par)
+  except:
+    self.taskdevicepluginconfig[1] = 0
   self.sync()
   return True
 
@@ -70,12 +80,17 @@ class Plugin(plugin.PluginProto):
      else:
       self.uservar[0] = v1 # store actual pin state into uservar
       misc.addLog(pglobals.LOG_LEVEL_INFO,self.taskname+": Syncing actual GPIO value "+str(v1))
+    self._lastdataservetime = utime.ticks_ms()
    if self.initialized:
     if self.taskdevicepluginconfig[0]==True:
      sps = "en"
     else:
      sps = "dis"
     misc.addLog(pglobals.LOG_LEVEL_INFO,"State preserving is "+sps+"abled")
+  if self.taskdevicepluginconfig[1]>0:
+       self.timer1s = True
+  else:
+       self.timer1s = False
 
 
  def set_value(self,valuenum,value,publish=True): # Also reacting and handling Taskvalueset
@@ -87,6 +102,7 @@ class Plugin(plugin.PluginProto):
      val = 0
     try:
      self._pin.value(val)
+     self._lastdataservetime = utime.ticks_ms()
     except Exception as e:
      misc.addLog(pglobals.LOG_LEVEL_ERROR,"Please set up GPIO type before use "+str(e))
   plugin.PluginProto.set_value(self,valuenum,value,publish)
@@ -99,3 +115,8 @@ class Plugin(plugin.PluginProto):
     val = 0
    self.set_value(1,val,False)
 #  print("Data received:",data) # DEBUG
+
+ def timer_once_per_second(self):
+  if int(self.uservar[0]) > 0:
+   if (utime.ticks_ms()-self._lastdataservetime >= (self.taskdevicepluginconfig[1]*1000)):
+    self.set_value(1,0,False)

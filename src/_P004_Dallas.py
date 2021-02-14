@@ -47,7 +47,7 @@ class Plugin(plugin.PluginProto):
   if str(self.taskdevicepluginconfig[0])=="0" or str(self.taskdevicepluginconfig[0]).strip()=="":
    self.initialized = False
    if self.enabled and enableplugin:
-    misc.addLog(pglobals.LOG_LEVEL_INFO,"Dallas device not selected!")    
+    misc.addLog(pglobals.LOG_LEVEL_INFO,"Dallas device not selected!")
   if self.initialized:
     self.ports = self.taskdevicepluginconfig[0]
     self._roms = self.find_dsb_devices()

@@ -64,14 +64,14 @@ class Controller(controller.ControllerProto):
 
  def controller_init(self,enablecontroller=None):
   lparams = {
-            'frequency': 868E6, 
-            'tx_power_level': 2, 
-            'signal_bandwidth': 125E3,    
-            'spreading_factor': 8, 
-            'coding_rate': 5, 
+            'frequency': 868E6,
+            'tx_power_level': 2,
+            'signal_bandwidth': 125E3,
+            'spreading_factor': 8,
+            'coding_rate': 5,
             'preamble_length': 8,
-            'implicit_header': False, 
-            'sync_word': 0x12, 
+            'implicit_header': False,
+            'sync_word': 0x12,
             'enable_CRC': True,
             'invert_IQ': False,
             }
@@ -185,7 +185,7 @@ class Controller(controller.ControllerProto):
 
    ws.addFormNumericBox("Sync Word","sync",self.sync,0,255)
    ws.addHtml( '( 0x{:02x} )'.format(self.sync) )
-   
+
    ws.addFormNote("Default 0x12, LoRaWAN is 0x34. Nodes can only communicate each other if uses same sync word!")
 
    ws.addFormCheckBox("Enable Sending","sender",self.enablesend)
@@ -227,10 +227,13 @@ class Controller(controller.ControllerProto):
      rssi = self._lora.packet_rssi()
     except:
      rssi = -100
-    dp = p2pbuffer.data_packet()
-    dp.buffer = payload
+    try:
+     dp = p2pbuffer.data_packet()
+     dp.buffer = payload
+     dp.decode()
 #    print("REC",payload,dp.buffer) #debug
-    dp.decode()
+    except:
+     pass
     try:
      if dp.pkgtype!=0:
         if dp.pkgtype==1:
@@ -380,8 +383,11 @@ class Controller(controller.ControllerProto):
      dp2.sensordata["valuecount"] = taskobj.valuecount
      for u in range(taskobj.valuecount):
       dp2.sensordata["values"][u] = taskobj.uservar[u]
-     dp2.encode(5)
-     return self.lorasend(dp2.buffer)
+     try:
+      dp2.encode(5)
+      return self.lorasend(dp2.buffer)
+     except:
+      pass
   return False
 
  def sendcommand(self,unitno,commandstr):
@@ -418,9 +424,12 @@ class Controller(controller.ControllerProto):
     dp.infopacket["type"] = int(pglobals.NODE_TYPE_ID)
     # CAPABILITIES byte: first bit 1 if able to send, second bit 1 if able to receive
     dp.infopacket["cap"] = int(CAPABILITY_BYTE)
-    dp.encode(1)
-    misc.addLog(pglobals.LOG_LEVEL_DEBUG,"LORA alive pkt sent")
-    return self.lorasend(dp.buffer)
+    try:
+     dp.encode(1)
+     misc.addLog(pglobals.LOG_LEVEL_DEBUG,"LORA alive pkt sent")
+     return self.lorasend(dp.buffer)
+    except:
+     pass
   return False
 
  def lorasend(self,data):

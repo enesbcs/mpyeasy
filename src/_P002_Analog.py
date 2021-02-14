@@ -31,7 +31,7 @@ class Plugin(plugin.PluginProto):
   self.recdataoption = False
   self.timer100ms = False
   self.readinprogress = False
-  self.adc = None
+  self._adc = None
 
  def plugin_init(self,enableplugin=None):
   plugin.PluginProto.plugin_init(self,enableplugin)
@@ -40,7 +40,7 @@ class Plugin(plugin.PluginProto):
   self.readinprogress = False
   if int(self.taskdevicepin[0])>=0 and self.enabled:
    try:
-    self.adc = ADC(Pin(int(self.taskdevicepin[0])))
+    self._adc = ADC(Pin(int(self.taskdevicepin[0])))
     self.initialized = True
    except Exception as e:
     misc.addLog(pglobals.LOG_LEVEL_ERROR,"Analog init error: "+str(e))
@@ -48,13 +48,13 @@ class Plugin(plugin.PluginProto):
  def webform_save(self):
      self.plugin_init()
      return True
- 
+
  def plugin_read(self):
   result = False
-  if self.initialized and self.enabled and self.readinprogress==False and (self.adc is not None):
+  if self.initialized and self.enabled and self.readinprogress==False and (self._adc is not None):
     self.readinprogress = True
     try:
-     self.set_value(1,self.adc.read(),False)
+     self.set_value(1,self._adc.read(),False)
      result = True
     except:
      pass

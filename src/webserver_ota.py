@@ -9,6 +9,22 @@ def handle_upload(httpClient, httpResponse):
  ws.navMenuIndex=7
  ws.TXBuffer = ""
 
+ try:
+     import inc.lib_blehelper as BLEHelper
+     _blestatus = BLEHelper.BLEStatus
+ except:
+     _blestatus = None
+ if _blestatus is not None:
+  try:
+   if _blestatus.isscaninprogress(): #ble scan interferes ota
+    _blestatus.requeststopscan(1)
+    import time
+    time.sleep(1)
+    if _blestatus.isscaninprogress():
+     _blestatus.forcestopscan()
+  except:
+   pass
+
  httpResponse.WriteResponseOk(
         headers = ({'Cache-Control': 'no-cache'}),
         contentType = 'text/html',

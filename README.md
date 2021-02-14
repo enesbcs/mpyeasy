@@ -1,8 +1,8 @@
-
-# If you like this project, or you wants to support the development, you can do that by:
-- Buying a [coffee](https://ko-fi.com/I3I5UT4H)
-- Direct [PayPal donation](https://www.paypal.me/rpieasy)
-- Contributing to any of my [Wishlist items](https://www.wishlist.com/wishlists_/alexander-nagy/dwGnV/)
+# To support the development you can:
+- Buy a [coffee](https://ko-fi.com/I3I5UT4H)
+- Donate by [PayPal](https://www.paypal.me/rpieasy)
+- Contribute to any of my [Wishlist items](https://www.wishlist.com/wishlists_/alexander-nagy/dwGnV/)
+- Be a patron at [Patreon](https://www.patreon.com/enesbcs)
 - Adding Python code by [Pull Request](https://github.com/enesbcs/mpyeasy/pulls)
 
 # mPyEasy
@@ -10,7 +10,7 @@
 Easy MultiSensor device based on ESP32 &amp; MicroPython
 
 Based on MicroPython and ESP32 this project tries to mimic the magnificent [ESPEasy](https://www.letscontrolit.com/wiki/index.php/ESPEasy) project functions. Python code is backported from RPIEasy.
-Main goal is to create a multisensor device, that can be install and setup quickly. 
+Main goal is to create a multisensor device, that can be install and setup quickly.
 
 Tested with ESP32 WROVER and WROOM modules with 4MB flash.
 

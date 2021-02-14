@@ -1,5 +1,5 @@
 PROGNAME = "mPyEasy"
-BUILD   = 10005
+BUILD   = 10006
 PROGVER = str(BUILD)[:1]+"."+str(BUILD)[1:2]+"."+str(BUILD)[2:]
 
 gpMenu = []

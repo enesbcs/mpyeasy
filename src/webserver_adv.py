@@ -24,11 +24,16 @@ def handle_adv(httpResponse,responsearr):
     if settings.AdvSettings["rtcaddr"]>=0:
      settings.AdvSettings["rtcaddr"] = int(ws.arg("rtcaddr",responsearr))
    except:
-    pass
+    settings.AdvSettings["extrtc"] = 0
+    settings.AdvSettings["rtci2c"] = 0
    try:
     settings.AdvSettings["dangerouspins"] = ws.arg("dangerouspins",responsearr)
    except:
     settings.AdvSettings["dangerouspins"] = False
+   try:
+    settings.AdvSettings["startpage"]  = str(ws.arg("startpage",responsearr))
+   except:
+    settings.AdvSettings["startpage"]  = "/"    
    settings.saveadvsettings()
 
  ws.sendHeadandTail("TmplStd",ws._HEAD)
@@ -76,12 +81,37 @@ def handle_adv(httpResponse,responsearr):
  options = ["0","0x68","0x51"]
  optionvalues = [0,0x68,0x51]
  ws.addFormSelector("RTC I2C address","rtcaddr",len(optionvalues),options,optionvalues,None,rtcaddr)
+ res = ""
+ try:
+  if settings.AdvSettings['extrtc']>0 and settings.AdvSettings['rtci2c']>=0:
+     import inc.mrtc as mrtc
+     try:
+      import inc.libhw as libhw
+     except:
+       pass
+     if mrtc.I2C_RTC is None:
+      if settings.AdvSettings['rtci2c']==0:
+       rtcok = mrtc.rtcinit(settings.AdvSettings['extrtc'],libhw.i2c0,settings.AdvSettings["rtcaddr"])
+      elif settings.AdvSettings['rtci2c']==1:
+       rtcok = mrtc.rtcinit(settings.AdvSettings['extrtc'],libhw.i2c1,settings.AdvSettings["rtcaddr"])
+     ret = mrtc.getrtctime()
+     res = '{:04}-{:02}-{:02} {:02}:{:02}:{:02}'.format(ret[0],ret[1],ret[2],ret[4],ret[5],ret[6])
+ except Exception as e:
+  res = "RTC not available "+str(e)
+ if settings.AdvSettings['extrtc']>0:
+    ws.addFormNote(res)
  ws.addFormSubHeader("Misc Settings")
  try:
   dpins = settings.AdvSettings["dangerouspins"]
  except:
   dpins = False
  ws.addFormCheckBox("Show dangerous pins","dangerouspins",dpins)
+
+ try:
+  sp = settings.AdvSettings["startpage"]
+ except:
+  sp = "/"
+ ws.addFormTextBox("Start page", "startpage", sp,64)
 
  ws.addFormSeparator(2)
  ws.TXBuffer += "<TR><TD style='width:150px;' align='left'><TD>"

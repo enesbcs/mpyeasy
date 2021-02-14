@@ -17,8 +17,8 @@ import inc.lib_axp as AXP
 import inc.libhw as libhw
 
 class Plugin(plugin.PluginProto):
- PLUGIN_ID = 211
- PLUGIN_NAME = "Control - AXP192 (M5StickC)"
+ PLUGIN_ID = 301
+ PLUGIN_NAME = "Control - AXP192"
  PLUGIN_VALUENAME1 = "Value1"
  PLUGIN_VALUENAME2 = "Value2"
  PLUGIN_VALUENAME3 = "Value3"
@@ -62,11 +62,11 @@ class Plugin(plugin.PluginProto):
  def webform_load(self): # create html page for settings
   ws.addFormNote("Default I2C address is 0x34")
   ws.addFormHeader("Initialization states")
-  ws.addFormCheckBox("LD02", "p211_p0",self.axparams[0])
-  ws.addFormCheckBox("LD03", "p211_p1",self.axparams[1])
-  ws.addFormCheckBox("RTC",  "p211_p2",self.axparams[2])
-  ws.addFormCheckBox("DCDC1","p211_p3",self.axparams[3])
-  ws.addFormCheckBox("DCDC3","p211_p4",self.axparams[4])
+  ws.addFormCheckBox("LD02", "p301_p0",self.axparams[0])
+  ws.addFormCheckBox("LD03", "p301_p1",self.axparams[1])
+  ws.addFormCheckBox("RTC",  "p301_p2",self.axparams[2])
+  ws.addFormCheckBox("DCDC1","p301_p3",self.axparams[3])
+  ws.addFormCheckBox("DCDC3","p301_p4",self.axparams[4])
   ws.addFormHeader("Values")
   choice1 = self.taskdevicepluginconfig[0]
   choice2 = self.taskdevicepluginconfig[1]
@@ -74,15 +74,15 @@ class Plugin(plugin.PluginProto):
   choice4 = self.taskdevicepluginconfig[3]
   options = ["None","Button","Temperature","BATT Voltage","BATT Current", "BATT Power","BATT Charge","IN Voltage","IN Current","Bus Voltage","Bus Current"]
   optionvalues = [0,1,2,3,4,5,6,7,8,9,10]
-  ws.addFormSelector("Indicator1","plugin_211_ind0",len(options),options,optionvalues,None,choice1)
-  ws.addFormSelector("Indicator2","plugin_211_ind1",len(options),options,optionvalues,None,choice2)
-  ws.addFormSelector("Indicator3","plugin_211_ind2",len(options),options,optionvalues,None,choice3)
-  ws.addFormSelector("Indicator4","plugin_211_ind3",len(options),options,optionvalues,None,choice4)
+  ws.addFormSelector("Indicator1","plugin_301_ind0",len(options),options,optionvalues,None,choice1)
+  ws.addFormSelector("Indicator2","plugin_301_ind1",len(options),options,optionvalues,None,choice2)
+  ws.addFormSelector("Indicator3","plugin_301_ind2",len(options),options,optionvalues,None,choice3)
+  ws.addFormSelector("Indicator4","plugin_301_ind3",len(options),options,optionvalues,None,choice4)
   return True
 
  def webform_save(self,params): # process settings post reply
   for v in range(0,4):
-   par = ws.arg("plugin_211_ind"+str(v),params)
+   par = ws.arg("plugin_301_ind"+str(v),params)
    if par == "":
     par = 0
    if str(self.taskdevicepluginconfig[v])!=str(par):
@@ -99,7 +99,7 @@ class Plugin(plugin.PluginProto):
   elif self.valuecount == 4:
    self.vtype = pglobals.SENSOR_TYPE_QUAD
   for v in range(0,5):
-   par = ws.arg("p211_p"+str(v),params)
+   par = ws.arg("p301_p"+str(v),params)
    self.axparams[v] = (par == "on")
   return True
 
@@ -111,14 +111,14 @@ class Plugin(plugin.PluginProto):
    for v in range(0,4):
     vtype = int(self.taskdevicepluginconfig[v])
     if vtype != 0:
-     self.set_value(v+1,self.p211_get_value(vtype),False)
+     self.set_value(v+1,self.p301_get_value(vtype),False)
    self.plugin_senddata()
    self._lastdataservetime = utime.ticks_ms()
    result = True
    self.readinprogress = 0
   return result
 
- def p211_get_value(self,ptype):
+ def p301_get_value(self,ptype):
    value = 0
    try:
     if ptype == 1:

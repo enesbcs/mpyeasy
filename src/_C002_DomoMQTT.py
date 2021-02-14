@@ -96,8 +96,6 @@ class Controller(controller.ControllerProto):
     self._mqttclient.connect()
     self._connected = self.isconnected()
     self._mqttclient.subscribe(self.outchannel.encode())   
-#    self.laststatus = 1
-#    commands.rulesProcessing("DomoMQTT#Connected",pglobals.RULE_SYSTEM)
    except Exception as e:
     misc.addLog(pglobals.LOG_LEVEL_ERROR,"MQTT controller: "+self.controllerip+":"+str(self.controllerport)+" connection failed "+str(e))
     self._connected = False
@@ -274,9 +272,9 @@ class Controller(controller.ControllerProto):
      usebattery = -1
     if int(idx) > 0:
      if usebattery != -1 and usebattery != 255:
-      bval = usebattery
+      bval = int(usebattery)
      else:
-      bval = misc.get_battery_value()
+      bval = int(misc.get_battery_value())
      msg = ""
      if (int(taskobj.vtype)==pglobals.SENSOR_TYPE_SWITCH):
       try:

@@ -604,6 +604,7 @@ class MicroWebSrv :
             if contentLength > 0 :
                 self._writeContentTypeHeader(contentType, contentCharset)
                 self._writeHeader("Content-Length", contentLength)
+            self._writeHeader("Access-Control-Allow-Origin", "*")#leaveme
             self._writeServerHeader()
             self._writeHeader("Connection", "close")
             self._writeEndHeader()

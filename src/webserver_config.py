@@ -28,6 +28,7 @@ def handle_config(httpResponse,responsearr):
     settings.Settings["AP2KEY"] = tpw
   settings.Settings['WifiClient'] = (ws.arg("wifista",responsearr)=="on")
   settings.Settings['WifiAP'] = int(ws.arg("apmode",responsearr))
+  settings.Settings['APCAPTIVE'] = (ws.arg("ap_captive",responsearr)=="on")  
   settings.Settings['WDHCP'] = (ws.arg("w_dhcp",responsearr)=="on")
   if settings.Settings['WDHCP']==False:
    settings.Settings['WIP'] = ws.arg("w_ip",responsearr)
@@ -80,6 +81,11 @@ def handle_config(httpResponse,responsearr):
  ws.addFormSelector("Start AP when","apmode",len(optionvalues),options,optionvalues,None,int(settings.Settings["WifiAP"]))
  ws.addFormTextBox("SSID", "apssid", settings.Settings["APSSID"], 32)
  ws.addFormPasswordBox("Wifi Key", "apkey", settings.Settings["APKEY"], 64)
+ try:
+   tpw = settings.Settings["APCAPTIVE"]
+ except:
+   tpw = False
+ ws.addFormCheckBox("Captive AP","ap_captive",tpw)
  httpResponse._write(ws.TXBuffer,strEncoding='UTF-8')
  ws.TXBuffer = ""
  if int(settings.HW["lan-phy"])>-1:

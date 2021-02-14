@@ -10,7 +10,12 @@ def handle_root(httpResponse,responsearr):
  ws.navMenuIndex=0
  ws.TXBuffer = ""
  responsestr = ""
-
+ try:
+  redir = settings.AdvSettings["startpage"]
+ except:
+  redir = "/"
+ if redir != "/":
+     return httpResponse.WriteResponseRedirect(redir)
  httpResponse.WriteResponseOk(
         headers = ({'Cache-Control': 'no-cache'}),
         contentType = 'text/html',

@@ -103,6 +103,9 @@ class Controller(controller.ControllerProto):
           settings.nodelist.sort(reverse=False,key=self.nodesort)
          else:
           settings.nodelist[un]["age"] = 0
+          settings.nodelist[un]["ip"] = self._dp.infopacket["ip"]
+          settings.nodelist[un]["port"] = self._dp.infopacket["port"]
+          settings.nodelist[un]["name"] = self._dp.infopacket["name"]
           if int(self._dp.infopacket["unitno"]) != int(settings.Settings["Unit"]):
            misc.addLog(pglobals.LOG_LEVEL_DEBUG,"Unit alive: "+str(self._dp.infopacket["unitno"]))
         elif self._dp.pkgtype==3:                              # process incoming new devices
@@ -157,10 +160,14 @@ class Controller(controller.ControllerProto):
 
         elif self._dp.pkgtype==0:
           misc.addLog(pglobals.LOG_LEVEL_INFO,"Command arrived from "+str(address))
-          cmdline = decodezerostr(self._dp.buffer)
-          commands.doExecuteCommand(cmdline,True)
+          try:
+           cmdline = decodezerostr(self._dp.buffer)
+          except:
+           cmdline = ""
+          if len(cmdline)>1:
+           commands.doExecuteCommand(cmdline,True)
       except Exception as e:
-        print("c13loop",e)    
+        print("c13loop",e)
     self.cbinprogress = False
   return self.onmsgcallbacksupported
 
@@ -226,7 +233,10 @@ class Controller(controller.ControllerProto):
   if self.enabled:
   #send alive signals
    dp = data_packet()
-   dp.infopacket["ip"] = str(unet.get_ip())
+   try:
+    dp.infopacket["ip"] = str(unet.get_ip())
+   except:
+    dp.infopacket["ip"] = "0.0.0.0"
    try:
     dp.infopacket["mac"] = str(unet.get_mac())
    except:
@@ -236,9 +246,12 @@ class Controller(controller.ControllerProto):
    dp.infopacket["name"] = settings.Settings["Name"]
    dp.infopacket["type"] = int(pglobals.NODE_TYPE_ID)
    dp.infopacket["port"] = int(80)
-   dp.encode(1)
-   self.udpsender(255,dp.buffer,1)
-   misc.addLog(pglobals.LOG_LEVEL_DEBUG,"P2P alive pkt sent")
+   try:
+    dp.encode(1)
+    self.udpsender(255,dp.buffer,1)
+    misc.addLog(pglobals.LOG_LEVEL_DEBUG,"P2P alive pkt sent")
+   except:
+    pass
    #clear old nodes
    for n in range(len(settings.nodelist)):
     try:
@@ -281,12 +294,18 @@ class data_packet:
   if ptype == 1:
    tbuf = [255,1]
    ta = self.infopacket["mac"].split(":")
+   if len(ta)<6:
+    for i in range(0,6-len(ta)):
+     ta.insert(0,"0")
    for m in ta:
     try:
      tbuf.append(int(m,16))
     except:
      tbuf.append(0)
    ta = self.infopacket["ip"].split(".")
+   if len(ta)<4:
+    for i in range(0,4-len(ta)):
+     ta.insert(0,"0")
    for m in ta:
     try:
      tbuf.append(int(m))
@@ -310,7 +329,10 @@ class data_packet:
    tbuf.append(int(self.infopacket["port"]/256))
    for b in range(len(tbuf),80):
     tbuf.append(0)
-   self.buffer = bytes(tbuf)
+   try:
+    self.buffer = bytes(tbuf)
+   except:
+    self.buffer = bytes()
   if ptype == 3:
    tbuf = [255,3]
    tbuf.append(int(self.sensorinfo["sunit"]))
@@ -365,6 +387,9 @@ class data_packet:
  def decode(self):
   tbuffer = list(self.buffer)
   self.pkgtype = 0
+  if len(tbuffer)<1:
+   self.clear()
+   return 0
   if tbuffer[0] == 255:
    if tbuffer[1] == 1: # sysinfo len=80
     self.pkgtype = 1

@@ -28,7 +28,7 @@ timer1s = 0
 timer2s = 0
 timer30s = 0
 init_ok = False
-lowram = False
+lowram = True
 prevminute = -1
 
 def hardwareInit():
@@ -98,7 +98,10 @@ def hardwareInit():
 def wificonnect():
  if settings.Settings['WifiClient']:
   print("Init wifi STA")
-  unet.wifi_sta_mode(1)
+  try:
+   unet.wifi_sta_mode(1)
+  except:
+   pass
   c = 15
   while (unet.wifi_sta_isconnected()==False) and (c>0):
    utime.sleep_ms(500)
@@ -123,6 +126,9 @@ def setclock():
      ntpres = unet.setntp(settings.AdvSettings['ntpserver'],settings.AdvSettings['timezone'])
      if ntpres:
       misc.start_time = utime.time()
+  except:
+   pass
+  try:
    if settings.AdvSettings['extrtc']>0 and settings.AdvSettings['rtci2c']>=0:
      import inc.mrtc as mrtc
      print("RTC time sync")
@@ -148,8 +154,8 @@ def setclock():
         misc.start_time = utime.time()
      if rtcok==False:
       print("RTC sync failed")
-  except:
-   pass
+  except Exception as e:
+   print("RTC init err:",e)
 
 def networkInit():
  print("Init network...")
@@ -212,7 +218,7 @@ def PluginInit():
    pglobals.deviceselector = inc.datacontainer.plugincont #frozen modules
   except:
    pass
- #print(pglobals.deviceselector)
+ print(pglobals.deviceselector)
  gc.collect()
  settings.loadtasks()
 
@@ -246,7 +252,7 @@ def CPluginInit():
    pglobals.controllerselector = inc.datacontainer.controllercont #frozen modules
   except:
    pass
- #print(pglobals.controllerselector)#debug
+# print(pglobals.controllerselector)#debug
  gc.collect()
  try:
   settings.loadcontrollers()
@@ -305,7 +311,7 @@ def NotifierInit():
    pglobals.notifierselector = inc.datacontainer.notifiercont #frozen modules
   except:
    pass
- #print(pglobals.deviceselector)#debug
+# print(pglobals.deviceselector)#debug
  gc.collect()
  settings.loadnotifiers()
 
@@ -431,6 +437,9 @@ def mainloop():
          if (timeoutReached(timer1s)):
           runoncepersecond()
           timer1s = utime.ticks_add(utime.ticks_ms(),1000)
+          if (timeoutReached(timer30s)):
+           runon30seconds()
+           timer30s = utime.ticks_add(utime.ticks_ms(),30000)
           ret = utime.localtime()
           amin = str('{:02}'.format(ret[4]))
           if (str(prevminute) != amin ):
@@ -439,9 +448,7 @@ def mainloop():
              prevminute = amin
             except Exception as e:
              print(e)
-          if (timeoutReached(timer30s)):
-           runon30seconds()
-           timer30s = utime.ticks_add(utime.ticks_ms(),30000)
+            gc.collect()
          if (timeoutReached(timer2s)):
           runon2seconds()
           timer2s = utime.ticks_add(utime.ticks_ms(),2000)
@@ -458,12 +465,11 @@ def main(**params):
     global timer100ms, timer20ms, timer1s, timer2s, timer30s, init_ok
     try:
      gc.enable()
-     gc.threshold(gc.mem_free() //4 + gc.mem_alloc())
     except:
      pass
     #Start init
     try:
-      tf = open('templ/TmplAP.txt',"r")
+      tf = open('www/dash.js',"r")
       doinit = False
     except OSError:
       doinit = True
@@ -492,6 +498,13 @@ def main(**params):
     timer2s    = timer100ms
     timer30s   = timer100ms
     gc.collect()
+    try:
+     if lowram:
+      gc.threshold(4096) #for esp32 wroom
+     else:
+      gc.threshold(gc.mem_free() //25) # for esp32 wrover
+    except:
+     pass
     if init_ok:
         print("Start mainloop")
         start_new_thread(mainloop, ())

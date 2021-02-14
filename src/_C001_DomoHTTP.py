@@ -2,12 +2,10 @@ import controller
 import pglobals
 from inc.helper_domoticz import *
 import misc
-#from multiprocessing import Process
-#import base64
 try:
-        import ubinascii as binascii
+ import ubinascii as binascii
 except ImportError:
-        import binascii
+ import binascii
 try:
  import urequests
  fake = False
@@ -54,16 +52,14 @@ class Controller(controller.ControllerProto):
     url += mapRSSItoDomoticz(taskobj.rssi)
     if taskobj.battery != -1 and taskobj.battery != 255: # battery input 0..100%, 255 means not supported
      url += "&battery="
-     url += str(taskobj.battery)
+     url += str(int(taskobj.battery))
     else:
      bval = misc.get_battery_value()
      url += "&battery="
-     url += str(bval)
+     url += str(int(bval))
     urlstr = self.controllerip+":"+self.controllerport+url+self.getaccountstr()
     misc.addLog(pglobals.LOG_LEVEL_DEBUG,urlstr) # sendviahttp
     self.urlget(urlstr)
-#    httpproc = Process(target=self.urlget, args=(urlstr,))  # use multiprocess to avoid blocking
-#    httpproc.start()
    else:
     misc.addLog(pglobals.LOG_LEVEL_ERROR,"MQTT : IDX cannot be zero!")
 
