@@ -36,7 +36,6 @@ def handle_blescan(httpResponse):
  if bleok:
      ws.TXBuffer += "<table class='multirow'><TR><TH>Address<TH>Address type<TH>RSSI<TH>Connectable<TH>Name<TH>Appearance</TH><TH>Actions</TH></TR>"
      cc = 0
-     print(devices)#debug
      for dev in devices:
       cc += 1
       ws.TXBuffer += "<TR><TD><div id='mac"+str(cc)+"_1' name='mac"+str(cc)+"_1'>"+str(dev.addr)+"</div><TD>"+str(dev.addrType)+"<TD>"+str(dev.rssi)+" dBm<TD>"+str(dev.connectable)
@@ -44,13 +43,22 @@ def handle_blescan(httpResponse):
       shortdname = ""
       appear = ""
       for (adtype, desc, value) in dev.getScanData():
-        print(adtype,desc,value)#debug
-        if desc.lower() == "complete local name":
-         dname = str(value)
-        if desc.lower() == "shortened local name":
-         shortdname = str(value)
-        if desc.lower() == "appearance":
-         appear = str(value)
+#        print(adtype,desc,value)#debug
+        try:
+         if desc.lower() == "complete local name":
+          dname = str(value)
+        except:
+         pass
+        try:        
+         if desc.lower() == "shortened local name":
+          shortdname = str(value)
+        except:
+         pass
+        try:                
+         if desc.lower() == "appearance":
+          appear = str(value)
+        except:
+         pass
       if dname.strip()=="":
         dname = shortdname
       ws.TXBuffer += "<TD>"+str(dname)+"<TD>"+str(appear)+"<TD>"

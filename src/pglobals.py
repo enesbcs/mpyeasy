@@ -1,5 +1,5 @@
 PROGNAME = "mPyEasy"
-BUILD   = 10006
+BUILD   = 10007
 PROGVER = str(BUILD)[:1]+"."+str(BUILD)[1:2]+"."+str(BUILD)[2:]
 
 gpMenu = []
@@ -16,6 +16,7 @@ webLoggedIn = False
 wifiSetup = False
 fpath = ""
 #fpath="/"
+lowram = True
 
 deviceselector = [[0,0,"- None -"]]
 controllerselector = [[0,0,"- None -"]]

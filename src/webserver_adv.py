@@ -31,6 +31,12 @@ def handle_adv(httpResponse,responsearr):
    except:
     settings.AdvSettings["dangerouspins"] = False
    try:
+    settings.AdvSettings["Latitude"]  = float(ws.arg("latitude",responsearr))
+    settings.AdvSettings["Longitude"] = float(ws.arg("longitude",responsearr))
+   except:
+    settings.AdvSettings["Latitude"]  = 0
+    settings.AdvSettings["Longitude"] = 0
+   try:
     settings.AdvSettings["startpage"]  = str(ws.arg("startpage",responsearr))
    except:
     settings.AdvSettings["startpage"]  = "/"    
@@ -112,6 +118,18 @@ def handle_adv(httpResponse,responsearr):
  except:
   sp = "/"
  ws.addFormTextBox("Start page", "startpage", sp,64)
+
+ ws.addFormSubHeader("Location Settings")
+ try:
+   lat = settings.AdvSettings["Latitude"]
+   lon = settings.AdvSettings["Longitude"]
+ except:
+   lat = 0
+   lon = 0
+ ws.addFormFloatNumberBox("Latitude", "latitude", lat , -90.0, 90.0)
+ ws.addUnit("&deg;")
+ ws.addFormFloatNumberBox("Longitude", "longitude", lon, -180.0, 180.0)
+ ws.addUnit("&deg;")
 
  ws.addFormSeparator(2)
  ws.TXBuffer += "<TR><TD style='width:150px;' align='left'><TD>"

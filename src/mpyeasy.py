@@ -28,11 +28,10 @@ timer1s = 0
 timer2s = 0
 timer30s = 0
 init_ok = False
-lowram = True
 prevminute = -1
 
 def hardwareInit():
- global lowram, hwok
+ global hwok
  print("Init hardware...")
  settings.loadhwsettings()
  try:
@@ -43,14 +42,14 @@ def hardwareInit():
     print("PSRAM found")
     settings.HW['psram-cs']=16
     settings.HW['psram-clk']=17
-    lowram = False
+    pglobals.lowram = False
    else:
     print("PSRAM not found - expect problems!")
     try:
      if esp_os.get_memory()['f']<120000:
-      lowram = True
+      pglobals.lowram = True
     except:
-     lowram = True
+     pglobals.lowram = True
  except:
   pass
  #init gpio,i2c,spi
@@ -218,7 +217,7 @@ def PluginInit():
    pglobals.deviceselector = inc.datacontainer.plugincont #frozen modules
   except:
    pass
- print(pglobals.deviceselector)
+# print(pglobals.deviceselector)
  gc.collect()
  settings.loadtasks()
 
@@ -317,10 +316,6 @@ def NotifierInit():
 
 
 def RulesInit():
- global lowram
- # if lowram:
- #     print("RAM is very low, Rules disabled")
- #     return False
  rules = ""
  try:
   with open(pglobals.FILE_RULES,'r',encoding="utf8") as f:
@@ -499,7 +494,7 @@ def main(**params):
     timer30s   = timer100ms
     gc.collect()
     try:
-     if lowram:
+     if pglobals.lowram:
       gc.threshold(4096) #for esp32 wroom
      else:
       gc.threshold(gc.mem_free() //25) # for esp32 wrover

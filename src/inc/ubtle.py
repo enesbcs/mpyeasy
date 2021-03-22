@@ -161,7 +161,7 @@ class ScanEntry:
         if sdid in [ScanEntry.SHORT_LOCAL_NAME, ScanEntry.COMPLETE_LOCAL_NAME]:
             try:
                 return val.decode('utf-8')
-            except UnicodeDecodeError:
+            except:
                 bbval = bytearray(val)
                 return ''.join( [ (chr(x) if (x>=32 and x<=127) else '?') for x in bbval ] )
         elif sdid in [ScanEntry.INCOMPLETE_16B_SERVICES, ScanEntry.COMPLETE_16B_SERVICES]:
@@ -221,7 +221,7 @@ class Scanner():
        self.timeout = timeout
        try:
         self.scanended = False
-        self.__ble.gap_scan(int(self.timeout * 1000),30000,30000) # active scan is still buggy in mpython!!
+        self.__ble.gap_scan(int(self.timeout * 1000),30000,30000,(passive==False)) # active scan is still buggy in mpython!!
        except Exception as e:
         self.scanended = True
 

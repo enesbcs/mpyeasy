@@ -9,11 +9,15 @@ _HEAD = False
 _TAIL = True
 INT_MIN = -2147483648
 INT_MAX = 2147483647
+tmplCache = {}
 
 def arg(argname,parent):
  return (argname in parent and parent[argname] or '')
 
 def getWebPageTemplateDefault(tmplName):
+  global tmplCache
+  if tmplName in tmplCache:
+   return tmplCache[tmplName]
   tmpl = ""
   file = open(pglobals.fpath+"templ/"+tmplName+".txt","r")
   try:
@@ -26,13 +30,14 @@ def getWebPageTemplateDefault(tmplName):
      tmpl = file.read()
     except:
       tmpl = ""
+  if tmpl != "":
+   tmplCache[tmplName] = tmpl
   return tmpl
 
 def getWebPageTemplateVar( varName ):
   global TXBuffer, navMenuIndex
 #  print(5,misc.get_memory(),varName)
   import settings
-  import pglobals
   if (varName == "name"):
     TXBuffer += settings.Settings["Name"]
   elif (varName == "unit"):
@@ -58,9 +63,9 @@ def getWebPageTemplateVar( varName ):
 
   elif (varName == "css"):
     try:
-      file = open("www/defaultu.css","r") # compat /
+#      file = open("www/defaultu.css","r") #no check
       TXBuffer += "<link rel=\"stylesheet\" type=\"text/css\" href=\"defaultu.css\">"
-      file.close()
+#      file.close()
     except:
       pass
 

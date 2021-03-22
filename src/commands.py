@@ -32,7 +32,9 @@ except:
 
 GlobalRules = []
 SysVars = ["systime","system_hm","lcltime","syshour","sysmin","syssec","sysday","sysmonth",
-"sysyear","sysyears","sysweekday","sysweekday_s","unixtime","uptime","rssi","ip","ip4","sysname","unit","ssid","mac","mac_int","build","sunrise","sunset","sun_altitude","sun_azimuth","sun_radiation","br","lf","tab"]
+"sysyear","sysyears","sysweekday","sysweekday_s","unixtime","uptime","rssi","ip","ip4","sysname","unit","ssid","mac","mac_int","build","sunrise","sunset","sun_altitude","sun_azimuth","sun_radiation","br","lf","tab",
+"v1","v2","v3","v4","v5","v6","v7","v8","v9","v10","v11","v12","v13","v14","v15","v16"]
+GlobalVars = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #16 global var
 
 def doCleanup():
   rulesProcessing("System#Shutdown",pglobals.RULE_SYSTEM)
@@ -208,6 +210,21 @@ def doExecuteCommand(cmdline,Parse=True):
  elif cmdarr[0] == "event":
   rulesProcessing(cmdarr[1],pglobals.RULE_USER)
   commandfound = True
+  return commandfound
+
+ elif cmdarr[0] == "let":
+  global GlobalVars
+  try:
+   s = int(cmdarr[1])-1
+  except:
+   s = -1
+  try:
+   v = parsevalue(cmdarr[2])
+  except:
+   v = 0
+  if s>=0 and s<16:
+   GlobalVars[s] = v
+   commandfound = True
   return commandfound
 
  elif cmdarr[0] == "sendto":
@@ -531,13 +548,13 @@ def getequchars(cstr,arr=False):
   return res
 
 def gettaskvaluefromname(taskname): # taskname#valuename->value
- res = -1
+ res = None
  try:
   taskprop = taskname.split("#")
   taskprop[0] = taskprop[0].strip().lower()
   taskprop[1] = taskprop[1].strip().lower() 
  except:
-  res = -1
+  res = None
   return res
  try:
   for s in range(len(settings.Tasks)):
@@ -548,13 +565,50 @@ def gettaskvaluefromname(taskname): # taskname#valuename->value
        res = settings.Tasks[s].uservar[v]
        break
  except:
-   res=-1
+   res=None
  return res
 
 suntimesupported = -1
 
+def addtoTime(basetime, deltastr): # -1h +2h -10m +3m ...
+ sign = 1
+ multi = 1
+ deltastr = str(deltastr).lower()
+ if "-" in deltastr:
+  sign = -1
+  deltastr = deltastr.replace("-","")
+ else:
+  deltastr = deltastr.replace("+","")
+ hours = 0
+ mins = 0
+ if "h" in deltastr:
+  deltastr = deltastr.replace("h","")
+  try:
+   hours = int(deltastr)
+  except:
+   hours = 0
+ if "m" in deltastr:
+  multi = 60
+  deltastr = deltastr.replace("m","")
+  try:
+   mins = int(deltastr)
+  except:
+   mins = 0
+ if mins>60:
+  hours += int(mins / 60)
+  mins = int(mins % 60)
+ if hours >23:
+  hours = 23
+ try:
+  if sign==1:
+   return basetime[0], basetime[1], basetime[2], basetime[3] + hours, basetime[4] + mins
+  else:
+   return basetime[0], basetime[1], basetime[2], basetime[3] - hours, basetime[4] - mins
+ except:
+  return basetime
+
 def getglobalvar(varname):
- global SysVars, suntimesupported
+ global SysVars, suntimesupported, GlobalVars
  svname = varname.strip().lower()
  par = ""
  if ("-" in svname):
@@ -646,10 +700,44 @@ def getglobalvar(varname):
     bstr = str(pglobals.BUILD)
     return bstr
    elif svname==SysVars[23]: #sunrise
-     res = "00:00"
+    try:
+      from inc.suntime.Suntime import Sun
+      suntimesupported = 1
+    except Exception as e:
+      suntimesupported = 0
+    if suntimesupported==1:
+     try:
+      tz = int(settings.AdvSettings["timezone"])/60.0
+     except Exception as e:
+      tz = 0
+     try:
+      sun = Sun(settings.AdvSettings["Latitude"],settings.AdvSettings["Longitude"],tz)
+      abd_sr = sun.get_sunrise_time()
+      if par!="":
+       abd_sr = addtoTime(abd_sr,par)
+      res = '{:02}:{:02}'.format(int(abd_sr[3]),int(abd_sr[4]))
+     except Exception as e:
+      res = "00:00"
      return res
    elif svname==SysVars[24]: #sunset
-     res = "00:00"
+    try:
+      from inc.suntime.Suntime import Sun
+      suntimesupported = 1
+    except:
+      suntimesupported = 0
+    if suntimesupported==1:
+     try:
+      tz = int(settings.AdvSettings["timezone"])/60
+     except:
+      tz = 0
+     try:
+      sun = Sun(settings.AdvSettings["Latitude"],settings.AdvSettings["Longitude"],tz)
+      abd_ss = sun.get_sunset_time()
+      if par!="":
+       abd_ss = addtoTime(abd_ss,par)
+      res = '{:02}:{:02}'.format(int(abd_ss[3]),int(abd_ss[4]))
+     except Exception as e:
+      res = "00:00"
      return res
 
    elif svname==SysVars[25]: #sun altitude
@@ -673,6 +761,13 @@ def getglobalvar(varname):
    elif svname==SysVars[30]: #%tab%
     return str("	")
 
+   elif svname[0]=="v":
+    try:
+     sid = int(svname[1:])-1
+    except Exception as e:
+     sid = -1
+    if sid>=0 and sid<16:
+     return(str(GlobalVars[sid]))
  return res
 
 def parsevalue(pvalue):
@@ -738,6 +833,22 @@ def parseconversions(cvalue):
    days, remainder = divmod(param, 1440)
    hours, minutes = divmod(remainder, 60)
    retval = retval[:cf]+str(int(days))+"d "+str(int(hours))+"h "+str(int(minutes))+"m"+retval[pe+1:]
+  cf = retval.find("%c_s2dhms%")
+  if cf>=0:
+   ps = retval.find("(",cf)
+   pe = -1
+   if ps >=0:
+    pe = retval.find(")",ps)
+   if pe >= 0:
+    param = retval[ps+1:pe].strip()
+   try:
+    param = float(param)
+   except:
+    param = 0
+   days, remainder = divmod(param, 86400)
+   hours, remainder2 = divmod(remainder, 3600)
+   minutes, seconds = divmod(remainder2, 60)
+   retval = retval[:cf]+str(int(days))+"d "+str(int(hours))+"h "+str(int(minutes))+"m "+str(int(seconds))+"s"+retval[pe+1:]
  return retval
 
 def parseruleline(linestr,rulenum=-1):
@@ -750,8 +861,26 @@ def parseruleline(linestr,rulenum=-1):
    for r in range(len(m)):
     tval = str(gettaskvaluefromname(m[r]))
     if tval=="None":
-     state = "INV"
-    cline = cline.replace("["+m[r]+"]",tval)
+     try:
+      taskprop = m[r].split("#")
+      taskprop[0] = taskprop[0].strip().lower()
+      taskprop[1] = taskprop[1].strip().lower()
+     except:
+      state = "INV"
+      tval ="None"
+      taskprop = []
+     if len(taskprop)>0:
+      if taskprop[0] in ["int", "var"]: #handle espeasy style global variables
+       try:
+        sid = int(taskprop[1])-1
+       except Exception as e:
+        sid = -1
+       if sid>=0 and sid<16:
+         tval = GlobalVars[sid]
+       else:
+         state = "INV"
+    if tval!="None":
+     cline = cline.replace("["+m[r]+"]",tval)
   else:
    print("Please avoid special characters in names! ",linestr)
  if ("%eventvalue%" in linestr) and (rulenum!=-1):
