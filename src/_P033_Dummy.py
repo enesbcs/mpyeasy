@@ -57,7 +57,6 @@ class Plugin(plugin.PluginProto):
     self.vtype = self.taskdevicepluginconfig[0]
     self.valuecount = self.getvaluecount()
     self.initialized = True
-    print("initok")#debug
 
  def webform_load(self): # create html page for settings
   choice = self.taskdevicepluginconfig[0]

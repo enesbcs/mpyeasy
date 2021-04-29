@@ -1,5 +1,5 @@
 PROGNAME = "mPyEasy"
-BUILD   = 10007
+BUILD   = 10008
 PROGVER = str(BUILD)[:1]+"."+str(BUILD)[1:2]+"."+str(BUILD)[2:]
 
 gpMenu = []
@@ -92,5 +92,5 @@ SENSOR_TYPE_WIND                 = 21
 SENSOR_TYPE_TEXT                 = 101
 
 NODE_TYPE_ID = NODE_TYPE_ID_ESP_EASY32_STD
-
+RULES_IF_MAX_NESTING_LEVEL = 4
 FILE_RULES        = "data/rules1.dat"

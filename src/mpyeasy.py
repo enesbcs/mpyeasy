@@ -362,6 +362,10 @@ def run10timespersecond():
         settings.Controllers[y].periodic_check()
      except:
        pass
+  try:
+   commands.ExecQueueCmds()
+  except:
+   pass
 
 def runoncepersecond():
    for x in range(0,len(settings.Tasks)):
@@ -501,10 +505,10 @@ def main(**params):
     except:
      pass
     if init_ok:
+        import webserver
         print("Start mainloop")
         start_new_thread(mainloop, ())
         # Run webserver loop
-        import webserver
         print("Starting webserver at",unet.get_ip())
         webserver.WebServer.Start(threaded=False)
         #_thread.start_new_thread(webserver.webstart, ())

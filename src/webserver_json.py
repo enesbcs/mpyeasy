@@ -8,6 +8,10 @@ try:
  import uos
 except:
  pass
+try:
+ import esp_os
+except:
+ pass
 
 def handle_json(httpResponse,responsearr):
  ws.navMenuIndex=7
@@ -56,12 +60,12 @@ def handle_json(httpResponse,responsearr):
    ws.TXBuffer += '","Unit":'+str(settings.Settings["Unit"])
    ws.TXBuffer += ',"Name":"'+str(settings.Settings["Name"])
    try:
-    ws.TXBuffer += '","Uptime":'+ str(misc.getuptime(0))
+    ws.TXBuffer += '","Uptime":'+ str(misc.getuptime(2))
    except:
     ws.TXBuffer += '","Uptime":0'
    ws.TXBuffer += ',"Load":0' #not supported
    try:
-    ws.TXBuffer += ',"Free RAM":'+str( int(esp_os.get_memory()['f'] /1024) )
+    ws.TXBuffer += ',"Free RAM":'+str( int(esp_os.get_memory()['f']) )
    except:
     ws.TXBuffer += ',"Free RAM":0'
    ws.TXBuffer += "},"
@@ -72,7 +76,7 @@ def handle_json(httpResponse,responsearr):
    ws.TXBuffer += '","Subnet Mask":"255.255.255.0' #not supported
    ws.TXBuffer += '","Gateway IP":"'
    ws.TXBuffer += '","MAC address":"'+unet.get_mac()
-   ws.TXBuffer += ',"SSID":"'+str( unet.get_ssid())+'"'
+   ws.TXBuffer += '","SSID":"'+str( unet.get_ssid())+'"'
    ws.TXBuffer += ',"RSSI":'+str(unet.get_rssi())
    ws.TXBuffer += "},"
   senstart = 0

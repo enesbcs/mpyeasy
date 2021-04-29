@@ -46,6 +46,7 @@ class Plugin(plugin.PluginProto):
   self.rssi = -1
   self.battery = 255
   self.startup = 0
+  self._decoding = 0
 
  def webform_load(self): # create html page for settings
   ws.addFormTextBox("Remote Device Address","plugin_527_addr",str(self.address),20)
@@ -100,6 +101,7 @@ class Plugin(plugin.PluginProto):
   if self.enabled:
     self._attribs = {}
     try:
+     self._decoding = 0
      self._blescanner = BLEScanner.request_blescan_device(BLEHelper.BLEDev,0) #params
      self._blestatus.requestimmediatestopscan = self._blescanner.stop
      if self._blescanner._scanning==False:
@@ -119,6 +121,8 @@ class Plugin(plugin.PluginProto):
     self.plugin_exit()
 
  def AdvDecoder(self,devip):
+   if self._decoding == 0:
+    self._decoding = 1
     try:
      devi = []
      try:
@@ -130,12 +134,15 @@ class Plugin(plugin.PluginProto):
        pass
      resp = {'addr':0,'type':0,'rssi':0,'flag':3,'d':b''}
      resp['type'], resp['addr'], resp['flag'], resp['rssi'], resp['d'] = devi
+     del devi
      addr = ubinascii.hexlify(resp['addr']).decode('utf-8')
-     addr = ':'.join([addr[i:i+2] for i in range(0,12,2)])     
+     addr = ':'.join([addr[i:i+2] for i in range(0,12,2)])
      notfound = True
      daddr = 0
      advdat = misc.mvtoarr(resp['d'],0)
-#     print(addr,advdat)#debug     
+     rssi = resp['rssi']
+     del resp
+#     print(addr,advdat)#debug
      while notfound and daddr<len(advdat):
         try:
           dlen = advdat[daddr]
@@ -149,7 +156,7 @@ class Plugin(plugin.PluginProto):
          notfound = False
          daddr = -1
 #     print("proc",addr,resp['rssi'],advdat)#debug
-#     print(advdat,daddr,advdat[daddr:])#debug     
+#     print(advdat,daddr,advdat[daddr:])#debug
      if daddr < 0:
       return False
      advdat = bytes(advdat[daddr:])
@@ -158,16 +165,20 @@ class Plugin(plugin.PluginProto):
      try:
       if len(advdat)>2:
        ddat = self.decode_xiaomi(advdat) # forward to xiaomi decoder
+      del advdat
      except Exception as e:
       print("decode xiaomi error",e)
 #     print(addr,ddat)#debug
      if len(ddat)>0:
       try:
-       self.dosync(addr,resp['rssi'],ddat) # if supported device, sync with all Tasks
+       self.dosync(addr,rssi,ddat) # if supported device, sync with all Tasks
       except:
        pass
+      del ddat
     except Exception as e:
      print("Decoding error:",e)#debug
+    self._decoding = 0
+    gc.collect()
 
  def plugin_exit(self):
      try:
@@ -267,6 +278,8 @@ class Plugin(plugin.PluginProto):
  def decode_xiaomi(self,buf):
   res = {}
   ofs = 0
+  cdata = [0]
+  cdata2 = [0]
   try:
    if len(buf)>16:
     cdata = struct.unpack_from('<HHHB6BBBBB',buf)
@@ -322,6 +335,8 @@ class Plugin(plugin.PluginProto):
      except:
       cdata = [0]
      res = {"temp":cdata[7]/10.0,"hum":cdata[8],"batt":cdata[9]}
+  del cdata
+  del cdata2
   return res
 
  def dosync(self,addr,rssi,values):

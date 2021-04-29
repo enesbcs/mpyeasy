@@ -215,7 +215,7 @@ def get_mac(nm=""):
       wlan = lan_if
     else:
      if _lan_mode==1:
-      wlan = lan_if        
+      wlan = lan_if
      elif (_active_mode & 1) == 1:
       wlan = network.WLAN(network.STA_IF)
      elif (_active_mode & 2) == 2:

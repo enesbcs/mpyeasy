@@ -1,4 +1,5 @@
 import webserver_global as ws
+import utime
 
 def handle_tools(httpResponse,responsearr):
  ws.navMenuIndex=7
@@ -26,10 +27,10 @@ def handle_tools(httpResponse,responsearr):
  try:
   if len(webrequest)>0:
    import commands
-   responsestr = str(commands.doExecuteCommand(webrequest))
+   commands.CommandQueue.append(webrequest) #   responsestr = str(commands.doExecuteCommand(webrequest))
  except:
   pass
- if len(responsestr)>0:
+ if len(webrequest)>0:
   try:
    import misc
    ws.TXBuffer += "<TR><TD colspan='2'>Command Output<BR><textarea readonly rows='10' wrap='on'>"

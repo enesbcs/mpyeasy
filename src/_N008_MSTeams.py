@@ -11,47 +11,41 @@ except:
 import gc
 
 class Plugin(nplugin.NPluginProto):
- NPLUGIN_ID = 6
- NPLUGIN_NAME = "Telegram"
+ NPLUGIN_ID = 8
+ NPLUGIN_NAME = "MS Teams"
 
  def __init__(self,nindex): # general init
   nplugin.NPluginProto.__init__(self,nindex)
-  self.server = "api.telegram.org"
+  self.server = "webhook.office.com"
   self.port = 443
   self.passw = ""
+  self.fullurl = ""
   self.chatid = ""
   self.body=""     # template
 
  def getuniquename(self):
-  return self.server
+  fullurl = ""
+  if self.fullurl !="":
+   furl = self.fullurl.replace("//","/")
+   try:
+    fa = furl.split("/")
+    fullurl = fa[1]
+   except:
+    pass
+  else:
+   fullurl = self.server
+  return fullurl
 
  def plugin_init(self,enableplugin=None):
   nplugin.NPluginProto.plugin_init(self,enableplugin)
   if self.passw=="*****":
    self.passw=""
   self.initialized = False
-  if self.enabled:
-   if self.chatid == "":
-    urlstr = "https://"+str(self.server)+":"+str(self.port)+"/bot"+str(self.passw)+"/getUpdates"
-    try:
-     content = urequests.get(urlstr)
-     ret = content.text
-     if ("{" in ret):
-      list = ujson.loads(ret)
-      self.chatid = list["result"][0]["message"]["from"]["id"]
-    except Exception as e:
-     self.chatid = ""
-     misc.addLog(pglobals.LOG_LEVEL_ERROR,"Telegram request failed: "+str(e)+" "+urlstr)
-   if self.chatid == "":
-    misc.addLog(pglobals.LOG_LEVEL_ERROR,"Telegram ChatID not found!")
-    self.initialized = False
-   else:
+  if self.fullurl != "" and self.enabled:
     self.initialized = True
 
  def webform_load(self): # create html page for settings
-  ws.addFormTextBox("Server","server",self.server,128)
-  ws.addFormNumericBox("Port","port",self.port,1,65535)
-  ws.addFormPasswordBox("Token","passw",self.passw,64)
+  ws.addFormTextBox("Teams channel Webhook URL","fullurl",self.fullurl,512)
   ws.addHtml("<TR><TD>Body:<TD><textarea name='body' rows='5' cols='80' size=255 wrap='off'>")
   ws.addHtml(str(self.body))
   ws.addHtml("</textarea>")
@@ -59,19 +53,7 @@ class Plugin(nplugin.NPluginProto):
   return True
 
  def webform_save(self,params): # process settings post reply
-  self.server = ws.arg("server",params)
-  par1 = ws.arg("port",params)
-  try:
-   par1=int(par1)
-  except:
-   par1=443
-  if par1<1 or par1>65534:
-   par1=443
-  self.port=par1
-  passw = ws.arg("passw",params)
-  if "**" not in passw:
-   self.passw  = passw
-   self.chatid = ""
+  self.fullurl = ws.arg("fullurl",params)
   self.body    = ws.arg("body",params)
   self.plugin_init()
   return True
@@ -83,24 +65,23 @@ class Plugin(nplugin.NPluginProto):
    message = self.msgparse(self.body)
   else:
    message = self.msgparse(pmsg)
-  if self.server=="0.0.0.0" or self.server=="":
+  try:
+   jdata = {'text': str(message) }
+   urlstr = str(self.fullurl)
+  except Exception as e:
+   misc.addLog(pglobals.LOG_LEVEL_ERROR,"Teams notification: "+str(e))
    return False
-  jdata = {}
-  jdata['chat_id'] = self.chatid
-  jdata['parse_mode'] = 'HTML'
-  jdata['text'] = message
-  urlstr = "https://"+str(self.server)+":"+str(self.port)+"/bot"+str(self.passw)+"/sendMessage"
-  misc.addLog(pglobals.LOG_LEVEL_INFO,"Sending telegram notification")
+  misc.addLog(pglobals.LOG_LEVEL_INFO,"Sending Teams notification")
   return self.urlpost(urlstr,jdata)
 
  def urlpost(self,url,postdata):
   gc.collect()
   try:
-   headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+   headers = {'Content-type': 'application/json'}
    response = urequests.post(url, json=postdata, headers=headers)
    return True
   except Exception as e:
-   misc.addLog(pglobals.LOG_LEVEL_ERROR,"Controller: "+self.server+" connection failed "+str(e))
+   misc.addLog(pglobals.LOG_LEVEL_ERROR,"Controller: "+self.getuniquename()+" connection failed "+str(e))
    return False
 
  def msgparse(self,ostr):

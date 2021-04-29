@@ -12,6 +12,9 @@ try:
 except:
  pass
 
+def get_us_from_sec(sec):
+    return sec * 1000
+
 class timer:
  def __init__(self,timerid):
   self.timerid = timerid
@@ -23,6 +26,11 @@ class timer:
   self.timeractive = False
   self.callback = None
   self.retvalue = [-1,-1]
+  self.looping = False
+  self.loopcount = 0
+  self.maxloops = -1
+  self.timeout = 0
+  self.laststart = 0
 
  def addcallback(self,callback):
   self.retvalue = [-1,-1]
@@ -31,18 +39,27 @@ class timer:
  def setretvalue(self,retvalue):
   self.retvalue = retvalue
 
- def start(self,timeout):
+ def start(self,timeout,usrcall=True,looping=False,maxloops=-1):
 #  print("Timer",self.timerid,"started with timeout:",timeout)
   try:
    if self.timer is not None:
-    self.timer.deinit()
-    self.timer = None
+    try:
+     self.timer.deinit()
+    except:
+     pass
    self.starttime = time.time()
    self.lefttime  = timeout
    self.state = 1
    self.timeractive = True
+   self.looping = looping
+   if usrcall or self.timeout==0:
+    self.timeout = timeout
+    self.maxloops = maxloops
+    self.loopcount = 0
+   self.loopcount += 1
+   self.laststart = time.time()
    self.timer = Timer(self.timerid-1)
-   self.timer.init(mode=Timer.ONE_SHOT,period=timeout,callback=self.stop)
+   self.timer.init(mode=Timer.ONE_SHOT,period=get_us_from_sec(timeout),callback=self.stop)
   except Exception as e:
    print(e)
 
@@ -64,6 +81,13 @@ class timer:
      self.callback(self.timerid) # call rules with timer id only
   except Exception as e:
    print(e)
+  if self.maxloops>-1:
+   if self.loopcount>=self.maxloops: #loop count reached
+    self.looping = False
+  if self.looping and call: #autorestart timer
+   self.start(self.timeout,False,True,self.maxloops)
+  else:
+   self.looping = False
 
  def pause(self):
   if self.state == 1:
@@ -72,13 +96,16 @@ class timer:
    if lefttime<self.lefttime:
     self.lefttime = self.lefttime - lefttime
     self.state = 2
-    self.timer.deinit()
+    try:
+     self.timer.deinit()
+    except:
+     pass
 
  def resume(self):
   if self.state == 2:
 #   print("Timer",self.timerid,"runnning continues for",self.lefttime)
    self.timer = Timer(self.timerid-1)
-   self.timer.init(mode=Timer.ONE_SHOT,period=self.lefttime,callback=self.stop)
+   self.timer.init(mode=Timer.ONE_SHOT,period=get_us_from_sec(self.lefttime),callback=self.stop)
    self.starttime = time.time()
    self.state = 1
    self.pausetime = 0

@@ -2,4 +2,4 @@ plugincont = [[0, 0, '- None -'], ['_P001_Switch', '1', 'Input - Switch Device/G
 
 controllercont = [[0, 0, '- None -'], ['_C001_DomoHTTP', '1', 'Domoticz HTTP'], ['_C002_DomoMQTT', '2', 'Domoticz MQTT'], ['_C013_ESPEasyP2P', '13', 'ESPEasy P2P'], ['_C014_GenMQTT', '14', 'Generic MQTT'], ['_C020_LoraDirect', '20', 'LORA Direct (EXPERIMENTAL)']]
 
-notifiercont = [[0, 0, '- None -'], ['_N001_Email', '1', 'Email (SMTP)'], ['_N006_Telegram', '6', 'Telegram']]
+notifiercont = [[0, 0, '- None -'], ['_N001_Email', '1', 'Email (SMTP)'], ['_N006_Telegram', '6', 'Telegram'], ['_N008_MSTeams', '8', 'MS Teams']]

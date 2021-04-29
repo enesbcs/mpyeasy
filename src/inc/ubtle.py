@@ -1,6 +1,7 @@
 import utime
 import ubinascii
 import struct
+import misc
 from micropython import const
 try:
  import ubluetooth
@@ -161,7 +162,7 @@ class ScanEntry:
         if sdid in [ScanEntry.SHORT_LOCAL_NAME, ScanEntry.COMPLETE_LOCAL_NAME]:
             try:
                 return val.decode('utf-8')
-            except:
+            except Exception as e:
                 bbval = bytearray(val)
                 return ''.join( [ (chr(x) if (x>=32 and x<=127) else '?') for x in bbval ] )
         elif sdid in [ScanEntry.INCOMPLETE_16B_SERVICES, ScanEntry.COMPLETE_16B_SERVICES]:
@@ -197,6 +198,7 @@ class Scanner():
        self._cached = []
        self._callback = callback
        self.scanended = True
+       self.irqprog = False
        try:
         self.__ble.active(True)
         self.__ble.irq(self.__bt_irq)
@@ -204,13 +206,17 @@ class Scanner():
         pass
 
     def __bt_irq(self,event, data):
-     if event == _IRQ_SCAN_RESULT:
-       self._cached.append(data)
+     if self.irqprog == False:
+      self.irqprog = True
+      if event == _IRQ_SCAN_RESULT:
        if self._callback is not None:
         try:
          self._callback(data)
         except Exception as e:
          pass
+       else:
+        self._cached.append(data)
+      self.irqprog = False
 
      elif event == _IRQ_SCAN_DONE:
        # Scan duration finished or manually stopped.
@@ -221,7 +227,7 @@ class Scanner():
        self.timeout = timeout
        try:
         self.scanended = False
-        self.__ble.gap_scan(int(self.timeout * 1000),30000,30000,(passive==False)) # active scan is still buggy in mpython!!
+        self.__ble.gap_scan(int(self.timeout * 1000),30000,30000,(passive==False))
        except Exception as e:
         self.scanended = True
 
@@ -232,6 +238,7 @@ class Scanner():
         except:
          pass
        self.scanended = True
+       self.irqprog = False
 
     def clear(self):
         self.scanned = {}
@@ -253,11 +260,18 @@ class Scanner():
                 try:
                  resp = {'addr':0,'type':0,'rssi':0,'flag':3,'d':b''}
                  resp['type'], resp['addr'], resp['flag'], resp['rssi'], resp['d'] = self._cached[0]
+                 addr = misc.mvtoarr(resp['addr'],0)
+                 resp['d'] = misc.mvtoarr(resp['d'],0)                 
+                 try:
+                  del self._cached[0]
+                 except:
+                  pass
                  try:
                   addr = ubinascii.hexlify(resp['addr']).decode('utf-8')
                   addr = ':'.join([addr[i:i+2] for i in range(0,12,2)])
                  except:
                   addr = ""
+#                 print(addr,resp['d'])#debug                  
                  if addr in self.scanned:
                     dev = self.scanned[addr]
                  else:
@@ -266,10 +280,7 @@ class Scanner():
                  isNewData = dev._update(resp)
                 except:
                  pass
-                try:
-                 del self._cached[0]
-                except:
-                 pass
+            utime.sleep_ms(1)
 
     def getDevices(self):
         try:

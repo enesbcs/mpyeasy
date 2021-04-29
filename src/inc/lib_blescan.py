@@ -120,7 +120,7 @@ class BLEScan():
       _blestatus.reportscan(1)
       try:
         self._scanner = Scanner(self._blehw,self._callback)
-        self._scanner.scan(self.timeout,passive=True)        
+        self._scanner.scan(self.timeout,passive=True)
       except:
         pass
       _blestatus.reportscan(0)

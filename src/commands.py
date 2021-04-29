@@ -35,6 +35,7 @@ SysVars = ["systime","system_hm","lcltime","syshour","sysmin","syssec","sysday",
 "sysyear","sysyears","sysweekday","sysweekday_s","unixtime","uptime","rssi","ip","ip4","sysname","unit","ssid","mac","mac_int","build","sunrise","sunset","sun_altitude","sun_azimuth","sun_radiation","br","lf","tab",
 "v1","v2","v3","v4","v5","v6","v7","v8","v9","v10","v11","v12","v13","v14","v15","v16"]
 GlobalVars = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #16 global var
+CommandQueue = []
 
 def doCleanup():
   rulesProcessing("System#Shutdown",pglobals.RULE_SYSTEM)
@@ -46,10 +47,6 @@ def doCleanup():
     try:
      if (settings.Tasks[x].enabled): # device enabled
       settings.Tasks[x].plugin_exit()
-#      t = threading.Thread(target=settings.Tasks[x].plugin_exit)
-#      t.daemon = True
-#      procarr.append(t)
-#      t.start()
     except:
      pass
   try:
@@ -62,10 +59,13 @@ def doCleanup():
    if (settings.Controllers[y]):
     if (settings.Controllers[y].enabled):
       settings.Controllers[y].controller_exit()
-#      t = threading.Thread(target=settings.Controllers[y].controller_exit)
-#      t.daemon = True
-#      procarr.append(t)
-#      t.start()
+
+def ExecQueueCmds():
+ global CommandQueue
+ if len(CommandQueue)>0:
+    for cmd in CommandQueue:
+     doExecuteCommand(cmd)
+    CommandQueue = []
 
 def doExecuteCommand(cmdline,Parse=True):
  if Parse:
@@ -199,11 +199,42 @@ def doExecuteCommand(cmdline,Parse=True):
    v = 1
   if s >0 and (s<len(upyTime.Timers)):
    s = s-1 # array is 0 based, timers is 1 based
-   if v==0:
-    upyTime.Timers[s].stop(False)
-   else:
-    upyTime.Timers[s].addcallback(TimerCallback)
-    upyTime.Timers[s].start(v)
+   try:
+    if v==0:
+     upyTime.Timers[s].stop(False)
+    else:
+     upyTime.Timers[s].addcallback(TimerCallback)
+     upyTime.Timers[s].start(v)
+   except Exception as e:
+    misc.addLog(pglobals.LOG_LEVEL_ERROR,"Timer start: "+str(e)) 
+  commandfound = True
+  return commandfound
+
+ elif cmdarr[0] == "looptimerset":
+  if len(upyTime.Timers)<1:
+   return False
+  try:
+   s = int(cmdarr[1])
+  except:
+   s = -1
+  try:
+   v = int(cmdarr[2])
+  except:
+   v = 1
+  try:
+   c = int(cmdarr[3])
+  except:
+   c = -1
+  if s >0 and (s<len(upyTime.Timers)):
+   s = s-1 # array is 0 based, timers is 1 based
+   try:
+    if v==0:
+     upyTime.Timers[s].stop(False)
+    else:
+     upyTime.Timers[s].addcallback(TimerCallback)
+     upyTime.Timers[s].start(v,looping=True,maxloops=c)
+   except Exception as e:
+    misc.addLog(pglobals.LOG_LEVEL_ERROR,"Timer start: "+str(e)) 
   commandfound = True
   return commandfound
 
@@ -504,19 +535,20 @@ def splitruletoevents(rulestr): # parse rule string into array of events
   if cs>-1:
    line = line[:cs]
   linelower = line.strip().lower()
-  if linelower.startswith("on ") and linelower.endswith(" do"):
-   rcount += 1
-   evfound = True
-   tstr = line.strip().split(" ")
-   ename = tstr[1]
-  elif evfound:
-   if linelower.startswith("endon"):
-    evfound = False
-    GlobalRules.append({"ename":ename,"ecat":decodeeventname(ename), "ecode":evarr,"lastcheck":0,"evalue":-1})
-    evarr = []
-    ename = ""
-   else:
-    evarr.append(line.strip())
+  if linelower != "":
+   if linelower.startswith("on ") and linelower.endswith(" do"):
+    rcount += 1
+    evfound = True
+    tstr = line.strip().split(" ")
+    ename = tstr[1]
+   elif evfound:
+    if linelower.startswith("endon"):
+     evfound = False
+     GlobalRules.append({"ename":ename,"ecat":decodeeventname(ename), "ecode":evarr,"lastcheck":0,"evalue":-1})
+     evarr = []
+     ename = ""
+    else:
+     evarr.append(line.strip())
 
 def getfirstequpos(cstr):
  res = -1
@@ -929,7 +961,7 @@ def isformula(line):
   return False
 
 def parseformula(line,value):
- fv = False
+ fv = None
  if "%value%" in line.lower():
   l2 = line.replace("%value%",str(value))
   fv = parsevalue(l2)
@@ -939,6 +971,10 @@ def rulesProcessing(eventstr,efilter=-1): # fire events
  global GlobalRules
  rfound = -1
  retval = 0
+ condlevel = 0
+ ifbools = []
+ for i in range(pglobals.RULES_IF_MAX_NESTING_LEVEL):
+  ifbools.append(True)
  misc.addLog(pglobals.LOG_LEVEL_INFO,"Event: "+eventstr)
  estr=eventstr.strip().lower()
  if len(GlobalRules)<1:             # if no rules found, exit
@@ -1020,7 +1056,11 @@ def rulesProcessing(eventstr,efilter=-1): # fire events
       elif state=="BREAK":
        return True
       else:
-       cret = doExecuteCommand(retval,False) # execute command
+       try:
+        cret = doExecuteCommand(retval,False) # execute command
+       except:
+        pass
+
 
 def comparetime(tstr):
  result = True
