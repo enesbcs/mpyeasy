@@ -1,5 +1,4 @@
 import webserver_global as ws
-import utime
 
 def handle_tools(httpResponse,responsearr):
  ws.navMenuIndex=7

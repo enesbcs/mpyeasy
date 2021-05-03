@@ -191,16 +191,16 @@ class Controller(controller.ControllerProto):
  def on_message(self, topic, msg):
   if self.enabled:
    msg2 = msg.decode('utf-8')
-   list = []
+   mlist = []
    if ('{' in msg2):
     try:
-     list = ujson.loads(msg2)
+     mlist = ujson.loads(msg2)
     except Exception as e:
      misc.addLog(pglobals.LOG_LEVEL_ERROR,"JSON decode error:"+str(e)+str(msg2))
-     list = []
-   if (list) and (len(list)>0):
+     mlist = []
+   if (mlist) and (len(mlist)>0):
     try:
-     if list['Type'] == "Scene": # not interested in scenes..
+     if mlist['Type'] == "Scene": # not interested in scenes..
       return False
     except:
      pass
@@ -210,17 +210,17 @@ class Controller(controller.ControllerProto):
     decodeerr = False
     tval = [-1,-1,-1,-1]
     try:
-     devidx = str(list['idx']).strip()
+     devidx = str(mlist['idx']).strip()
     except:
      devidx = -1
      decodeerr = True
     try:
-     nvalue = str(list['nvalue']).strip()
+     nvalue = str(mlist['nvalue']).strip()
     except:
      nvalue = "0"
      decodeerr = True
     try:
-     svalue = str(list['svalue']).strip()
+     svalue = str(mlist['svalue']).strip()
     except:
      svalue = ""
     if (';' in svalue):
@@ -229,7 +229,7 @@ class Controller(controller.ControllerProto):
     for x in range(1,4):
      sval = ""
      try:
-      sval = str(list['svalue'+str(x)]).strip()
+      sval = str(mlist['svalue'+str(x)]).strip()
      except:
       sval = ""
      if sval!="":
@@ -243,7 +243,7 @@ class Controller(controller.ControllerProto):
         tval[y] = tval2[y]
     forcesval1 = False
     try:
-     if ("Selector" in list['switchType']) or ("Dimmer" in list['switchType']):
+     if ("Selector" in mlist['switchType']) or ("Dimmer" in mlist['switchType']):
       forcesval1 = True
     except:
      forcesval1 = False

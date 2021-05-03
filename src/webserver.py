@@ -93,7 +93,7 @@ def handle_hw(httpClient, httpResponse):
  gc.collect()
 
 @MicroWebSrv.route('/sysinfo')
-def handle_root(httpClient, httpResponse):
+def handle_sysinfo(httpClient, httpResponse):
  try:
   import webserver_sysinfo
   webserver_sysinfo.handle_sysinfo(httpResponse)
